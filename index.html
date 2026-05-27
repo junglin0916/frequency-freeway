@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frequency Freeway - Right Sentence Edition</title>
+    <title>Frequency Freeway - Complete Classroom Edition</title>
     <style>
         body {
             margin: 0;
@@ -20,7 +20,7 @@
             height: 100vh;
             background: linear-gradient(to bottom, #111 40%, #2c3e50 100%);
         }
-        /* Two Lanes for Two Choices */
+        /* Center Divider for 2 Choice Lanes */
         .lane {
             position: absolute;
             top: 0;
@@ -55,18 +55,19 @@
             background: #f1c40f;
             color: #111;
             padding: 15px 40px;
-            font-size: 34px;
+            font-size: 32px;
             font-weight: bold;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.4);
             z-index: 20;
             text-align: center;
-            width: 70%;
+            width: 75%;
+            line-height: 1.4;
         }
         /* Giant Sentence Bubbles */
         .bubble {
             position: absolute;
-            width: 320px;
+            width: 340px;
             height: 180px;
             background: rgba(41, 128, 185, 0.95);
             border: 5px solid #3498db;
@@ -164,49 +165,100 @@
         let currentRoundQuestion = null;
         let activeBubbles = [];
 
-        // Direct questions and translation structures from the provided worksheet [cite: 4, 5, 6, 8, 10, 11, 12, 19, 21, 22]
+        // Full 15-Question Database from Worksheet Structure
         const quizDatabase = [
+            // --- FOCUS: Action Verbs ("I sometimes do" / "He/She sometimes does") ---
             {
-                chinese: "我上學從不遲到 [cite: 8]",
-                correct: "I am never late for school. [cite: 4, 22]",
-                wrong: "I never am late for school.",
-                exp: "Remember the grammar rule: be動詞 + 頻率副詞 (am never)."
+                chinese: "你週末會去騎腳踏車嗎？ (提示：用 do 開頭問句)",
+                correct: "Do you go bicycle riding on weekends?",
+                wrong: "Are you go bicycle riding on weekends?",
+                exp: "問句用 Do you...？[cite: 3] 回答就要用動詞助動詞簡答：'I sometimes do.' [cite: 6]"
             },
             {
-                chinese: "他們在早上總是變得很忙碌 ",
-                correct: "They are always busy in the morning. [cite: 4, 19]",
-                wrong: "They always are busy in the morning.",
-                exp: "Rule: be動詞 + 頻率副詞 (are always)."
+                chinese: "你星期日通常在家做什麼？ (提示：日常習慣問句)",
+                correct: "What do you usually do on Sunday?",
+                wrong: "What are you usually do on Sunday?",
+                exp: "這是一般動詞問句！[cite: 3] 當被問到習慣時，簡答要配合助動詞：'I sometimes do.' [cite: 6]"
             },
             {
-                chinese: "台灣夏天經常是下雨的 [cite: 5]",
-                correct: "It is usually rainy in summer. [cite: 5, 21]",
-                wrong: "It usually is rainy in summer.",
-                exp: "Rule: be動詞 + 頻率副詞 (is usually)."
-            },
-            {
-                chinese: "我經常吃蛋和牛奶當早餐 (加入usually) [cite: 10]",
-                correct: "I usually have eggs and milk for my breakfast. [cite: 10]",
+                chinese: "我通常吃蛋和牛奶當早餐。 (通常：usually)",
+                correct: "I usually have eggs and milk for my breakfast.",
                 wrong: "I have usually eggs and milk for my breakfast.",
-                exp: "Rule: 頻率副詞 + 一般動詞 (usually have)."
+                exp: "頻率副詞位置規則：頻率副詞 + 一般動詞 (usually have) [cite: 4]。簡答代換為 'I sometimes do.' [cite: 6]"
             },
             {
-                chinese: "Mandy上學常常遲到 (加入often) [cite: 12]",
-                correct: "Mandy is often late for school. [cite: 12]",
-                wrong: "Mandy often is late for school.",
-                exp: "Rule: be動詞 + 頻率副詞 (is often)."
+                chinese: "他放學後常常打籃球嗎？ (提示：主詞為單數 he)",
+                correct: "Does he often play basketball after school?",
+                wrong: "Is he often play basketball after school?",
+                exp: "一般動詞 play 的問句用 Does he...？[cite: 13] 簡答對應為：'He sometimes does'（或自己回答 'I sometimes do' [cite: 6]）。"
             },
             {
-                chinese: "我姐姐很少在晚上洗澡 [cite: 9]",
-                correct: "My sister seldom takes a bath at night. [cite: 9]",
+                chinese: "他們有時候走路去上學。 (有時候：sometimes)",
+                correct: "They sometimes walk to school.",
+                wrong: "They are sometimes walk to school.",
+                exp: "walk 是一般動詞 [cite: 5]，直接說 They sometimes walk 即可 [cite: 5]，不需要加 be動詞！此類別簡答用 do [cite: 6]。"
+            },
+            {
+                chinese: "我姐姐很少在晚上洗澡。 (很少：seldom)",
+                correct: "My sister seldom takes a bath at night.",
                 wrong: "My sister takes seldom a bath at night.",
-                exp: "Rule: 頻率副詞 + 一般動詞 (seldom takes)."
+                exp: "頻率副詞位置：頻率副詞 + 一般動詞 (seldom takes) [cite: 4, 9]。簡答對應形式為 'She sometimes does'。"
             },
             {
-                chinese: "重組：My mother / is / always / busy / in the morning / . [cite: 19]",
-                correct: "My mother is always busy in the morning. [cite: 19]",
+                chinese: "她會和她媽媽一起去購物。 (有時候：sometimes)",
+                correct: "She sometimes goes shopping with her mom.",
+                wrong: "She goes sometimes shopping with her mom.",
+                exp: "加入頻率副詞要放在一般動詞 goes 的前面：'She sometimes goes...' [cite: 4, 14]。"
+            },
+            {
+                chinese: "你通常在什麼時候做功課？ (重組練習)",
+                correct: "When do you usually do your homework?",
+                wrong: "When you usually do do your homework?",
+                exp: "助動詞 do 要放在主詞 you 的前面 [cite: 18]。這種 action verb 問句的簡答也是 'I sometimes do.' [cite: 6]"
+            },
+            {
+                chinese: "你星期六晚上通常做些什麼？ (日常習慣問句)",
+                correct: "What do you usually do on Saturday night?",
+                wrong: "What usually do you do on Saturday night?",
+                exp: "問句結構為：疑問詞 + do + 主詞 + usually + 動詞原型 [cite: 23]。習慣問句簡答：'I sometimes do.' [cite: 6]"
+            },
+
+            // --- CONTRAST: "To Be" Verbs ("I sometimes am" / "It is") ---
+            {
+                chinese: "我上學從不遲到。 (從不：never)",
+                correct: "I am never late for school.",
+                wrong: "I never am late for school.",
+                exp: "注意 be動詞的規則：be動詞 + 頻率副詞 (am never) [cite: 4]！被詢問時，簡答要用 'I sometimes am.'"
+            },
+            {
+                chinese: "他們在早上總是變得很忙碌。 (總是：always)",
+                correct: "They are always busy in the morning.",
+                wrong: "They always are busy in the morning.",
+                exp: "位置規則：be動詞 + 頻率副詞 (are always) [cite: 4]！簡答要對應 be動詞，不可誤用 do！"
+            },
+            {
+                chinese: "台灣夏天經常是下雨的。 (經常：usually)",
+                correct: "It is usually rainy in summer.",
+                wrong: "It usually is rainy in summer.",
+                exp: "位置規則：be動詞 + 頻率副詞 (is usually) [cite: 4, 5]。天氣簡答型態：'It usually is.'"
+            },
+            {
+                chinese: "Mandy上學常常遲到。 (常常：often)",
+                correct: "Mandy is often late for school.",
+                wrong: "Mandy often is late for school.",
+                exp: "位置規則：be動詞 + 頻率副詞 (is often) [cite: 4, 12]。他人詢問時簡答要說：'She sometimes is.'"
+            },
+            {
+                chinese: "你上班總是很早到嗎？ (通常：usually)",
+                correct: "Are you usually early to work?",
+                wrong: "Do you usually early to work?",
+                exp: "early 是形容詞，問句要用 be動詞問：Are you...？[cite: 12] 被這樣問時，你的簡答必須是：'I sometimes am.' (不能選 do！)"
+            },
+            {
+                chinese: "我媽媽在早上總是變得很忙碌。 (重組練習)",
+                correct: "My mother is always busy in the morning.",
                 wrong: "My mother always is busy in the morning.",
-                exp: "Correct word order: Subject + be + frequency adverb."
+                exp: "正確字序：主詞 + be動詞 + 頻率副詞 + 形容詞 [cite: 4, 19]。"
             }
         ];
 
@@ -233,7 +285,7 @@
         updateCar();
         window.addEventListener('resize', updateCar);
 
-        // Controls: Left Arrow/A goes Left lane, Right Arrow/D goes Right lane
+        // Keyboard Controls: Left Arrow/A or Right Arrow/D
         window.addEventListener('keydown', (e) => {
             if (!gameActive) return;
             if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
@@ -249,37 +301,35 @@
         function startRound() {
             if (!gameActive) return;
             
-            // Clean out old bubbles if any exist
+            // Clear prior active bubbles
             activeBubbles.forEach(b => b.element.remove());
             activeBubbles = [];
 
-            // Pick a random prompt from the worksheet database
+            // Grab random question from the 15-item array
             currentRoundQuestion = quizDatabase[Math.floor(Math.random() * quizDatabase.length)];
             promptBox.innerText = "請找出正確的句子：\n" + currentRoundQuestion.chinese;
 
-            // Randomize lanes for correct vs wrong answers
             const correctLane = Math.floor(Math.random() * 2); 
             const screenWidth = window.innerWidth;
 
-            // Create Correct Bubble
+            // Generate Correct Bubble
             const bCorrect = document.createElement('div');
             bCorrect.className = 'bubble';
             bCorrect.innerText = currentRoundQuestion.correct;
-            bCorrect.style.left = (correctLane === 0 ? (screenWidth * 0.25 - 160) : (screenWidth * 0.75 - 160)) + 'px';
+            bCorrect.style.left = (correctLane === 0 ? (screenWidth * 0.25 - 170) : (screenWidth * 0.75 - 170)) + 'px';
             bCorrect.style.top = '-200px';
             container.appendChild(bCorrect);
             activeBubbles.push({ element: bCorrect, isCorrect: true, lane: correctLane });
 
-            // Create Wrong Bubble
+            // Generate Wrong Bubble
             const bWrong = document.createElement('div');
             bWrong.className = 'bubble';
             bWrong.innerText = currentRoundQuestion.wrong;
-            bWrong.style.left = (correctLane === 0 ? (screenWidth * 0.75 - 160) : (screenWidth * 0.25 - 160)) + 'px';
+            bWrong.style.left = (correctLane === 0 ? (screenWidth * 0.75 - 170) : (screenWidth * 0.25 - 170)) + 'px';
             bWrong.style.top = '-200px';
             container.appendChild(bWrong);
             activeBubbles.push({ element: bWrong, isCorrect: false, lane: (correctLane === 0 ? 1 : 0) });
 
-            // Animation Loop
             let topPos = -200;
             const interval = setInterval(() => {
                 if (!gameActive) {
@@ -287,25 +337,24 @@
                     return;
                 }
 
-                // ULTRA SLOW SPEED (1.20) for easy classroom tracking and reading aloud
+                // ULTRA SLOW falling speed factor for projectors
                 topPos += 1.20; 
                 bCorrect.style.top = topPos + 'px';
                 bWrong.style.top = topPos + 'px';
 
-                // Check collisions when bubbles reach the car level
                 const carRect = car.getBoundingClientRect();
                 
                 activeBubbles.forEach(bubble => {
                     const bRect = bubble.element.getBoundingClientRect();
                     
-                    // Collision check
+                    // Direct hit registration
                     if (bRect.bottom >= carRect.top && bRect.top <= carRect.bottom && bubble.lane === carLane) {
                         clearInterval(interval);
                         processResult(bubble.isCorrect, "hit");
                     }
                 });
 
-                // MISS checking: If bubbles pass the car without being caught
+                // Check if items slipped off the screen entirely
                 if (topPos > window.innerHeight - 100) {
                     clearInterval(interval);
                     processResult(false, "miss");
@@ -319,21 +368,18 @@
             feedbackBox.style.display = 'block';
 
             if (action === "hit" && isCorrect) {
-                // Caught the right sentence!
                 if (currentPlayer === 1) p1Score += 10; else p2Score += 10;
                 feedbackBox.style.borderColor = '#2ecc71';
                 feedbackTitle.innerText = "🎉 正確 (CORRECT!)";
                 feedbackTitle.style.color = '#2ecc71';
                 feedbackText.innerHTML = "太棒了！你選到了正確的句子！<br><br>" + currentRoundQuestion.exp;
             } else if (action === "hit" && !isCorrect) {
-                // Caught the wrong sentence!
                 if (currentPlayer === 1) p1Score = Math.max(0, p1Score - 5); else p2Score = Math.max(0, p2Score - 5);
                 feedbackBox.style.borderColor = '#e74c3c';
                 feedbackTitle.innerText = "❌ 答錯了 (WRONG SENTENCE!)";
                 feedbackTitle.style.color = '#e74c3c';
                 feedbackText.innerHTML = "撞到錯誤的句子囉！扣 5 分！<br><br>" + currentRoundQuestion.exp;
             } else if (action === "miss") {
-                // Let the correct sentence slip away!
                 if (currentPlayer === 1) p1Score = Math.max(0, p1Score - 5); else p2Score = Math.max(0, p2Score - 5);
                 feedbackBox.style.borderColor = '#f39c12';
                 feedbackTitle.innerText = "😮 漏掉了 (MISSED IT!)";
@@ -358,7 +404,7 @@
             setTimeout(startRound, 1000);
         }
 
-        // Initialize first round
+        // Delay launch slightly on startup
         setTimeout(startRound, 1500);
     </script>
 </body>
