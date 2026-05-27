@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frequency Freeway: Adverbs of Frequency</title>
+    <title>Frequency Freeway - Classroom Edition</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            background: #222;
+            background: #1a1a1a;
             font-family: 'Arial', sans-serif;
             overflow: hidden;
             color: white;
@@ -18,164 +18,208 @@
             position: relative;
             width: 100vw;
             height: 100vh;
-            background: linear-gradient(to bottom, #111 60%, #333 100%);
+            background: linear-gradient(to bottom, #111 40%, #2c3e50 100%);
         }
-        /* The Road lanes */
+        /* Massive Road Lanes */
         .lane {
             position: absolute;
             top: 0;
             bottom: 0;
-            width: 2px;
+            width: 4px;
             background: dashed #fff;
-            opacity: 0.3;
+            opacity: 0.4;
         }
-        /* Red Sports Car */
+        /* Large Projector-Ready Car */
         #car {
             position: absolute;
-            bottom: 40px;
-            width: 60px;
-            height: 100px;
-            background: #e74c3c;
-            border-radius: 10px 10px 5px 5px;
-            box-shadow: 0 0 15px rgba(231, 76, 60, 0.7), inset 0 25px 0 #c0392b;
-            transition: left 0.1s ease-out;
+            bottom: 50px;
+            width: 100px;
+            height: 160px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            transition: left 0.2s ease-out, background-color 0.3s;
             z-index: 10;
         }
-        /* Car windshield & headlights */
+        /* Windshield for the car */
         #car::before {
             content: '';
             position: absolute;
-            top: 25px; left: 8px; width: 44px; height: 20px;
-            background: #34495e; border-radius: 3px;
+            top: 35px; left: 12px; width: 76px; height: 35px;
+            background: #2c3e50; border-radius: 5px;
         }
-        /* Bubbles/Questions */
+        /* Giant Bubble Text for Projector */
         .bubble {
             position: absolute;
-            width: 140px;
-            height: 140px;
-            background: rgba(52, 152, 219, 0.7);
-            border: 3px solid #3498db;
+            width: 240px;
+            height: 240px;
+            background: rgba(41, 128, 185, 0.9);
+            border: 5px solid #3498db;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 10px;
+            padding: 20px;
             box-sizing: border-box;
-            font-size: 14px;
+            font-size: 26px; /* Massive text size */
             font-weight: bold;
             color: white;
-            text-shadow: 1px 1px 2px black;
-            box-shadow: 0 0 15px rgba(52, 152, 219, 0.5);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
-        /* UI Elements */
-        #ui {
+        /* Giant UI Header */
+        #ui-header {
             position: absolute;
-            top: 20px; left: 20px;
-            font-size: 24px;
+            top: 20px;
+            left: 5%;
+            right: 5%;
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0,0,0,0.7);
+            padding: 15px 30px;
+            border-radius: 10px;
+            border: 2px solid #555;
             z-index: 20;
         }
-        #instructions {
-            position: absolute;
-            top: 20px; right: 20px;
-            font-size: 16px;
-            background: rgba(0,0,0,0.5);
-            padding: 10px;
-            border-radius: 5px;
-            z-index: 20;
+        .score-box {
+            font-size: 32px;
+            font-weight: bold;
         }
-        /* Feedback Modal */
+        #turn-indicator {
+            font-size: 36px;
+            font-weight: bold;
+            color: #f1c40f;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(241,196,15,0.5);
+        }
+        /* Giant Classroom Explanation Modal */
         #feedback {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            border: 4px solid #fff;
-            padding: 30px;
-            border-radius: 15px;
+            background: rgba(15, 15, 15, 0.98);
+            border: 6px solid #fff;
+            padding: 40px;
+            border-radius: 20px;
             text-align: center;
             display: none;
             z-index: 30;
-            max-width: 400px;
+            width: 70%;
+            max-width: 800px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
         }
-        #feedback h2 { margin-top: 0; }
+        #feedback h2 { 
+            font-size: 50px; 
+            margin-top: 0; 
+        }
+        #feedback p { 
+            font-size: 32px; 
+            line-height: 1.5;
+            margin: 30px 0;
+        }
         #feedback button {
-            background: #2ecc71; border: none; padding: 10px 20px;
-            color: white; font-size: 18px; border-radius: 5px; cursor: pointer;
-            margin-top: 15px;
+            background: #2ecc71; border: none; padding: 20px 50px;
+            color: white; font-size: 32px; font-weight: bold; border-radius: 10px; cursor: pointer;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.3);
         }
+        #feedback button:hover { background: #27ae60; }
     </style>
 </head>
 <body>
 
     <div id="game-container">
-        <div class="lane" style="left: 25%;"></div>
-        <div class="lane" style="left: 50%;"></div>
-        <div class="lane" style="left: 75%;"></div>
+        <div class="lane" style="left: 33.33%;"></div>
+        <div class="lane" style="left: 66.66%;"></div>
 
-        <div id="ui">Score: <span id="score">0</span></div>
-        <div id="instructions">🚗 Use <b>Left/Right Arrows</b> or <b>A/D</b> to steer!<br>Crash into questions answered by:<br><span style="color: #2ecc71; font-weight: bold;">"I sometimes do."</span></div>
+        <div id="ui-header">
+            <div class="score-box" style="color: #e74c3c;">P1 (Red): <span id="p1-score">0</span></div>
+            <div id="turn-indicator">Player 1's Turn (Red Car)</div>
+            <div class="score-box" style="color: #3498db;">P2 (Blue): <span id="p2-score">0</span></div>
+        </div>
 
         <div id="car"></div>
 
         <div id="feedback">
             <h2 id="feedback-title">Correct!</h2>
             <p id="feedback-text">Explanation goes here.</p>
-            <button onclick="closeFeedback()">Continue</button>
+            <button onclick="closeFeedback()">Next Turn ➔</button>
         </div>
     </div>
 
     <script>
         const container = document.getElementById('game-container');
         const car = document.getElementById('car');
-        const scoreDisplay = document.getElementById('score');
+        const p1ScoreDisplay = document.getElementById('p1-score');
+        const p2ScoreDisplay = document.getElementById('p2-score');
+        const turnIndicator = document.getElementById('turn-indicator');
         const feedbackBox = document.getElementById('feedback');
         const feedbackTitle = document.getElementById('feedback-title');
         const feedbackText = document.getElementById('feedback-text');
 
-        let score = 0;
+        let p1Score = 0;
+        let p2Score = 0;
+        let currentPlayer = 1; // 1 = Red, 2 = Blue
         let carLane = 1; // 0: Left, 1: Middle, 2: Right
-        const lanes = [window.innerWidth * 0.15, window.innerWidth * 0.45, window.innerWidth * 0.75];
         let gameActive = true;
+        let bubbleSpawnTimeout;
 
-        // Question Database
+        // Worksheet Specific Questions Database
         const questions = [
-            { text: "Do you ever play video games?", isCorrect: true, exp: "Correct! 'Do you...' questions use 'do' in the short answer: 'I sometimes do.'" },
-            { text: "Do you eat breakfast?", isCorrect: true, exp: "Correct! Because the question starts with 'Do you', the short answer matches: 'I sometimes do.'" },
-            { text: "Do you walk to school?", isCorrect: true, exp: "Correct! Action verbs driven by 'Do' result in 'I sometimes do.'" },
-            { text: "Are you sometimes late?", isCorrect: false, exp: "Wrong! 'Are' is a 'To Be' verb. The short answer should be: 'I sometimes am.'" },
-            { text: "Can you drive a car?", isCorrect: false, exp: "Wrong! 'Can' is a modal verb. The short answer should be: 'I sometimes can.'" },
-            { text: "Is he always happy?", isCorrect: false, exp: "Wrong! The question is about 'he' and uses 'is'. Short answer: 'He sometimes is.'" }
+            // Target structures ("I sometimes do" / Action Verbs)
+            { text: "Do you usually stay at home on Sunday?", isCorrect: true, exp: "Correct! 'Do you...' questions use the action verb helper in short answers: 'I sometimes do.'" },
+            { text: "Do you go bicycle riding on weekends?", isCorrect: true, exp: "Correct! For action items starting with 'Do you', the short answer is: 'I sometimes do.'" },
+            { text: "Do you usually do homework after school?", isCorrect: true, exp: "Correct! This uses an action verb loop. Short answer: 'I sometimes do.'" },
+            { text: "Does he often play basketball?", isCorrect: true, exp: "Correct! Even though it asks about 'he', it still matches our 'Do/Does' action verb goal! (Short answer: 'He sometimes does / I sometimes do' structure)." },
+            { text: "Do you sometimes walk to school?", isCorrect: true, exp: "Correct! It uses the action verb helper: 'I sometimes do.'" },
+            
+            // Distractors ("To Be" structures - I sometimes am)
+            { text: "Are you usually late for school?", isCorrect: false, exp: "Incorrect! 'Are' is a form of 'To Be'. The correct short answer must be: 'I sometimes am.'" },
+            { text: "Is it usually rainy in summer?", isCorrect: false, exp: "Incorrect! This describes weather with 'Is'. The short answer must be: 'It usually is.'" },
+            { text: "Are you early to work?", isCorrect: false, exp: "Incorrect! This targets the 'To Be' verb 'Are'. The short answer should be: 'I sometimes am.'" },
+            { text: "Is your mother always busy?", isCorrect: false, exp: "Incorrect! This uses the 'To Be' structure. Short answer: 'She always is.'" }
         ];
 
-        // Position Car Initially
-        function updateCarPosition() {
+        // Setup Car Theme based on Current Turn
+        function updateCarTheme() {
             const laneWidth = window.innerWidth / 3;
-            car.style.left = (laneWidth * carLane + (laneWidth / 2) - 30) + 'px';
+            car.style.left = (laneWidth * carLane + (laneWidth / 2) - 50) + 'px';
+            
+            if (currentPlayer === 1) {
+                car.style.backgroundColor = '#e74c3c'; // Red Sports Car
+                car.style.boxShadow = '0 0 25px rgba(231, 76, 60, 0.8), inset 0 35px 0 #c0392b';
+                turnIndicator.innerText = "👉 Player 1's Turn (Red Car) 👈";
+                turnIndicator.style.color = '#e74c3c';
+            } else {
+                car.style.backgroundColor = '#3498db'; // Blue Sports Car
+                car.style.boxShadow = '0 0 25px rgba(52, 152, 219, 0.8), inset 0 35px 0 #2980b9';
+                turnIndicator.innerText = "👉 Player 2's Turn (Blue Car) 👈";
+                turnIndicator.style.color = '#3498db';
+            }
         }
-        updateCarPosition();
-        window.addEventListener('resize', updateCarPosition);
+        updateCarTheme();
+        window.addEventListener('resize', updateCarTheme);
 
-        // Controls
+        // Classroom Keyboard Controls (A/D or Arrows work instantly)
         window.addEventListener('keydown', (e) => {
             if (!gameActive) return;
-            if ((e.key === 'ArrowLeft' || e.key === 'a') && carLane > 0) {
+            if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && carLane > 0) {
                 carLane--;
-                updateCarPosition();
+                updateCarTheme();
             }
-            if ((e.key === 'ArrowRight' || e.key === 'd') && carLane < 2) {
+            if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && carLane < 2) {
                 carLane++;
-                updateCarPosition();
+                updateCarTheme();
             }
         });
 
-        // Spawn Bubbles
+        // Spawn a Slow-Moving Bubble
         function spawnBubble() {
             if (!gameActive) return;
 
             const bubble = document.createElement('div');
             bubble.className = 'bubble';
             
+            // Grab a question randomly from the worksheet list
             const q = questions[Math.floor(Math.random() * questions.length)];
             bubble.innerText = q.text;
             bubble.dataset.isCorrect = q.isCorrect;
@@ -183,13 +227,12 @@
 
             const randomLane = Math.floor(Math.random() * 3);
             const laneWidth = window.innerWidth / 3;
-            bubble.style.left = (laneWidth * randomLane + (laneWidth / 2) - 70) + 'px';
-            bubble.style.top = '-150px';
+            bubble.style.left = (laneWidth * randomLane + (laneWidth / 2) - 120) + 'px';
+            bubble.style.top = '-260px';
 
             container.appendChild(bubble);
 
-            // Bubble Animation
-            let topPos = -150;
+            let topPos = -260;
             const interval = setInterval(() => {
                 if (!gameActive) {
                     clearInterval(interval);
@@ -197,10 +240,10 @@
                     return;
                 }
 
-                topPos += 5; // Speed
+                topPos += 2.5; // SLOWED SPEED: Reduced from 5 to 2.5 for easy projector tracking
                 bubble.style.top = topPos + 'px';
 
-                // Check collision with car
+                // Check collision boxes
                 const carRect = car.getBoundingClientRect();
                 const bubbleRect = bubble.getBoundingClientRect();
 
@@ -215,10 +258,12 @@
                     triggerFeedback(q);
                 }
 
-                // Remove if off-screen
+                // Clean up if missed
                 if (topPos > window.innerHeight) {
                     clearInterval(interval);
                     bubble.remove();
+                    // If they dodge everything, spawn another one for the same player
+                    spawnBubble();
                 }
             }, 10);
         }
@@ -227,29 +272,40 @@
             gameActive = false;
             feedbackBox.style.display = 'block';
             
-            if (q.isCorrect === true || q.isCorrect === "true") {
-                score += 10;
+            const isTrue = (q.isCorrect === true || q.isCorrect === "true");
+            
+            if (isTrue) {
+                if (currentPlayer === 1) p1Score += 10; else p2Score += 10;
                 feedbackBox.style.borderColor = '#2ecc71';
-                feedbackTitle.innerText = "🎉 Correct!";
+                feedbackTitle.innerText = "🎉 CORRECT!";
                 feedbackTitle.style.color = '#2ecc71';
             } else {
-                score = Math.max(0, score - 5);
                 feedbackBox.style.borderColor = '#e74c3c';
-                feedbackTitle.innerText = "❌ Not Quite!";
+                feedbackTitle.innerText = "❌ NOT QUITE!";
                 feedbackTitle.style.color = '#e74c3c';
             }
             
-            scoreDisplay.innerText = score;
+            // Render scoreboard updates
+            p1ScoreDisplay.innerText = p1Score;
+            p2ScoreDisplay.innerText = p2Score;
             feedbackText.innerText = q.exp;
         }
 
         function closeFeedback() {
             feedbackBox.style.display = 'none';
+            
+            // Switch Player Turn
+            currentPlayer = currentPlayer === 1 ? 2 : 1;
+            carLane = 1; // Reset car to middle lane
+            updateCarTheme();
+            
             gameActive = true;
+            // Delay the next spawn slightly so the player can prepare
+            setTimeout(spawnBubble, 1000);
         }
 
-        // Loop Spawning
-        setInterval(spawnBubble, 3000);
+        // Start initial spawn sequence
+        setTimeout(spawnBubble, 1500);
     </script>
 </body>
 </html>
