@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frequency Freeway - Complete Classroom Edition with Sound</title>
+    <title>Frequency Freeway - Complete Classroom Edition with Music & Fun SFX</title>
     <style>
         body {
             margin: 0;
@@ -136,7 +136,7 @@
             <div class="score-box" style="color: #3498db;">P2 (Blue): <span id="p2-score">0</span></div>
         </div>
 
-        <div id="prompt-box">請點擊畫面的任一處以啟動音效與遊戲！<br>(Click anywhere to activate sounds & start!)</div>
+        <div id="prompt-box">請點擊畫面的任一處以啟動音樂與遊戲！<br>(Click anywhere to start music & play!)</div>
         <div id="car"></div>
 
         <div id="feedback">
@@ -161,10 +161,11 @@
         let p2Score = 0;
         let currentPlayer = 1;
         let carLane = 0; // 0: Left Lane, 1: Right Lane
-        let gameActive = false; // Starts false until teacher interacts/clicks
+        let gameActive = false; 
         let audioCtx = null;
         let currentRoundQuestion = null;
         let activeBubbles = [];
+        let musicInterval = null;
 
         // Full 15-Question Database from Worksheet Structure
         const quizDatabase = [
@@ -244,7 +245,7 @@
                 exp: "位置規則：be動詞 + 頻率副詞 (is usually)。天氣簡答型態：'It usually is.'"
             },
             {
-                chinese: "Mandy上學常常遲到。 (常常：often)",
+                chinese: "Mandy上學常常遲到. (常常：often)",
                 correct: "Mandy is often late for school.",
                 wrong: "Mandy often is late for school.",
                 exp: "位置規則：be動詞 + 頻率副詞 (is often)。他人詢問時簡答要說：'She sometimes is.'"
@@ -263,50 +264,94 @@
             }
         ];
 
-        // --- SYNTHETIC SOUND ENGINE CODE ---
+        // --- CODE-BASED AUDIO GENERATOR ENGINE ---
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                startBackgroundMusic();
             }
+        }
+
+        // Background Music Melody Setup
+        function startBackgroundMusic() {
+            // Cheerful looping game show style baseline theme
+            // Sequence of notes: C4, E4, G4, E4, F4, A4, C5, A4
+            const notes = [261.63, 329.63, 392.00, 329.63, 349.23, 440.00, 523.25, 440.00];
+            let step = 0;
+
+            musicInterval = setInterval(() => {
+                if (!audioCtx || audioCtx.state === 'suspended') return;
+                
+                // Only play background music when the quiz screen is running actively
+                if (!gameActive) return;
+
+                let osc = audioCtx.createOscillator();
+                let gainNode = audioCtx.createGain();
+                
+                osc.type = "triangle"; // Smooth, retro vibe sound
+                osc.frequency.setValueAtTime(notes[step % notes.length], audioCtx.currentTime);
+                
+                gainNode.gain.setValueAtTime(0.04, audioCtx.currentTime); // Soft volume level
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.4);
+                
+                step++;
+            }, 400); // Speed tempo of music
         }
 
         function playSound(type) {
             if (!audioCtx) return;
             
-            let osc = audioCtx.createOscillator();
-            let gainNode = audioCtx.createGain();
-            osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-
             let now = audioCtx.currentTime;
 
             if (type === "correct") {
-                // High Pitch Sweet Chime
+                // High Pitch Win Chime
+                let osc = audioCtx.createOscillator();
+                let gainNode = audioCtx.createGain();
                 osc.type = "sine";
-                osc.frequency.setValueAtTime(523.25, now); // C5 note
-                osc.frequency.setValueAtTime(659.25, now + 0.1); // E5 note
-                gainNode.gain.setValueAtTime(0.3, now);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-                osc.start(now);
-                osc.stop(now + 0.4);
-            } else if (type === "wrong") {
-                // Harsh Retro Buzz Low Sound
-                osc.type = "sawtooth";
-                osc.frequency.setValueAtTime(130.81, now); // C3 low note
-                osc.frequency.linearRampToValueAtTime(90, now + 0.3);
-                gainNode.gain.setValueAtTime(0.4, now);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-                osc.start(now);
-                osc.stop(now + 0.3);
-            } else if (type === "miss") {
-                // Declining sad slide sound
-                osc.type = "triangle";
-                osc.frequency.setValueAtTime(220, now);
-                osc.frequency.linearRampToValueAtTime(110, now + 0.5);
-                gainNode.gain.setValueAtTime(0.3, now);
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.setValueAtTime(659.25, now + 0.1);
+                osc.frequency.setValueAtTime(783.99, now + 0.2);
+                gainNode.gain.setValueAtTime(0.2, now);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-                osc.start(now);
-                osc.stop(now + 0.5);
+                osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+                osc.start(now); osc.stop(now + 0.5);
+            } 
+            else if (type === "wrong" || type === "miss") {
+                // --- CUSTOM SYNTHETIC FART SOUND EFFECT Generator ---
+                // Farts consist of very low frequencies, raw sawtooth/square waves, and fluctuating frequency pitch curves
+                let osc1 = audioCtx.createOscillator();
+                let osc2 = audioCtx.createOscillator();
+                let gainNode = audioCtx.createGain();
+
+                osc1.type = "sawtooth";
+                osc2.type = "sawtooth";
+
+                // Ultra low pitch with rapid slide downward to create the flapping tone
+                osc1.frequency.setValueAtTime(85, now);
+                osc1.frequency.linearRampToValueAtTime(45, now + 0.4);
+
+                osc2.frequency.setValueAtTime(82, now); // Slight detune for a rougher rumble
+                osc2.frequency.linearRampToValueAtTime(40, now + 0.4);
+
+                // Quick initial volume pop, fading out roughly
+                gainNode.gain.setValueAtTime(0.4, now);
+                gainNode.gain.linearRampToValueAtTime(0.3, now + 0.2);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+
+                osc1.connect(gainNode);
+                osc2.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                osc1.start(now);
+                osc2.start(now);
+                osc1.stop(now + 0.45);
+                osc2.stop(now + 0.45);
             }
         }
 
@@ -332,7 +377,7 @@
             }
         }
 
-        // Initialize click listener to unlock web browser audio security policy
+        // Click to boot up engine
         window.addEventListener('click', () => {
             if (!audioCtx) {
                 initAudio();
@@ -341,7 +386,7 @@
             }
         });
 
-        // Keyboard Controls: Left Arrow/A or Right Arrow/D
+        // Key listeners
         window.addEventListener('keydown', (e) => {
             if (!gameActive) return;
             if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
@@ -367,7 +412,7 @@
             const correctLane = Math.floor(Math.random() * 2); 
             const screenWidth = window.innerWidth;
 
-            // Generate Correct Bubble
+            // Correct Option
             const bCorrect = document.createElement('div');
             bCorrect.className = 'bubble';
             bCorrect.innerText = currentRoundQuestion.correct;
@@ -376,7 +421,7 @@
             container.appendChild(bCorrect);
             activeBubbles.push({ element: bCorrect, isCorrect: true, lane: correctLane });
 
-            // Generate Wrong Bubble
+            // Faulty Option
             const bWrong = document.createElement('div');
             bWrong.className = 'bubble';
             bWrong.innerText = currentRoundQuestion.wrong;
@@ -415,30 +460,30 @@
         }
 
         function processResult(isCorrect, action) {
-            gameActive = false;
+            gameActive = false; // Pauses loop and halts background background track note ticks
             feedbackBox.style.display = 'block';
 
             if (action === "hit" && isCorrect) {
-                playSound("correct"); // Play Chime
+                playSound("correct");
                 if (currentPlayer === 1) p1Score += 10; else p2Score += 10;
                 feedbackBox.style.borderColor = '#2ecc71';
                 feedbackTitle.innerText = "🎉 正確 (CORRECT!)";
                 feedbackTitle.style.color = '#2ecc71';
                 feedbackText.innerHTML = "太棒了！你選到了正確的句子！<br><br>" + currentRoundQuestion.exp;
             } else if (action === "hit" && !isCorrect) {
-                playSound("wrong"); // Play Buzz
+                playSound("wrong"); // Fart Sound
                 if (currentPlayer === 1) p1Score = Math.max(0, p1Score - 5); else p2Score = Math.max(0, p2Score - 5);
                 feedbackBox.style.borderColor = '#e74c3c';
-                feedbackTitle.innerText = "❌ 答錯了 (WRONG SENTENCE!)";
+                feedbackTitle.innerText = "💨 答錯了 (WRONG SENTENCE!)";
                 feedbackTitle.style.color = '#e74c3c';
-                feedbackText.innerHTML = "撞到錯誤的句子囉！扣 5 分！<br><br>" + currentRoundQuestion.exp;
+                feedbackText.innerHTML = "撞到錯誤的句子囉！噗～～扣 5 分！<br><br>" + currentRoundQuestion.exp;
             } else if (action === "miss") {
-                playSound("miss"); // Play Sad slide sound
+                playSound("miss"); // Fart Sound
                 if (currentPlayer === 1) p1Score = Math.max(0, p1Score - 5); else p2Score = Math.max(0, p2Score - 5);
                 feedbackBox.style.borderColor = '#f39c12';
-                feedbackTitle.innerText = "😮 漏掉了 (MISSED IT!)";
+                feedbackTitle.innerText = "💨 漏掉了 (MISSED IT!)";
                 feedbackTitle.style.color = '#f39c12';
-                feedbackText.innerHTML = "你沒有接住正確的句子！扣 5 分！<br>正確答案是：<br><b>" + currentRoundQuestion.correct + "</b>";
+                feedbackText.innerHTML = "你完全沒去接正確的句子！噗～～扣 5 分！<br>正確答案是：<br><b>" + currentRoundQuestion.correct + "</b>";
             }
 
             p1ScoreDisplay.innerText = p1Score;
@@ -450,11 +495,10 @@
             activeBubbles.forEach(b => b.element.remove());
             activeBubbles = [];
             
-            // Switch Player Turn
             currentPlayer = currentPlayer === 1 ? 2 : 1;
             updateCar();
             
-            gameActive = true;
+            gameActive = true; // Resumes background loop melody automatically
             setTimeout(startRound, 1000);
         }
     </script>
