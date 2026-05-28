@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frequency Freeway - Ultra-Slow 3D Classroom Edition</title>
+    <title>Frequency Freeway - Ultra-Slow 3D Classroom Edition (Pro Scoring)</title>
     <style>
         body {
             margin: 0;
@@ -53,7 +53,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             padding: 10px 25px;
             border-radius: 8px;
             border: 2px solid #444;
@@ -61,6 +61,17 @@
         }
         .score-box { font-size: 28px; font-weight: bold; }
         #turn-indicator { font-size: 30px; font-weight: bold; text-align: center; }
+        
+        /* Real-time Dynamic Score Value Indicator Box */
+        #bonus-meter {
+            background: #2ecc71;
+            color: #fff;
+            padding: 4px 15px;
+            border-radius: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+        }
 
         /* 3D 3-Dimensional Highway Canvas Track */
         #highway-3d {
@@ -167,6 +178,7 @@
         <div id="ui-header">
             <div class="score-box" style="color: #e74c3c;">P1 (Red): <span id="p1-score">0</span></div>
             <div id="turn-indicator">Player 1's Turn</div>
+            <div id="bonus-meter">Current Value: +20</div>
             <div class="score-box" style="color: #3498db;">P2 (Blue): <span id="p2-score">0</span></div>
         </div>
 
@@ -190,6 +202,7 @@
         const p1ScoreDisplay = document.getElementById('p1-score');
         const p2ScoreDisplay = document.getElementById('p2-score');
         const turnIndicator = document.getElementById('turn-indicator');
+        const bonusMeterDisplay = document.getElementById('bonus-meter');
         const feedbackBox = document.getElementById('feedback');
         const feedbackTitle = document.getElementById('feedback-title');
         const feedbackText = document.getElementById('feedback-text');
@@ -203,6 +216,7 @@
         let currentRoundQuestion = null;
         let activeBubbles = [];
         let musicInterval = null;
+        let currentQuestionValue = 20; // Starts at max reward, ticks lower over time
 
         // Full 15-Question Database from Worksheet Structure
         const quizDatabase = [
@@ -399,6 +413,11 @@
             activeBubbles.forEach(b => b.element.remove());
             activeBubbles = [];
 
+            // Reset score value meter tracking metrics
+            currentQuestionValue = 20;
+            bonusMeterDisplay.innerText = "Current Value: +20";
+            bonusMeterDisplay.style.backgroundColor = "#2ecc71";
+
             currentRoundQuestion = quizDatabase[Math.floor(Math.random() * quizDatabase.length)];
             promptBox.innerText = "請找出正確的句子：\n" + currentRoundQuestion.chinese;
             updateCarDisplay();
@@ -430,8 +449,22 @@
                     return;
                 }
 
-                // SPEED DROPPED 10 TIMES SLOWER: FROM 0.7 DOWN TO 0.07 FOR ABSOLUTE READABILITY
+                // 10 TIMES SLOWER SPEEDS RETAINED
                 progress += 0.07; 
+
+                // Dynamic score devaluation decay curve mapping
+                // Drop reward metrics proportionally down from 20 to 5 based on proximity distance depth progress
+                let dynamicValue = Math.max(5, Math.round(20 - (progress / 92) * 15));
+                if (dynamicValue !== currentQuestionValue) {
+                    currentQuestionValue = dynamicValue;
+                    bonusMeterDisplay.innerText = `Current Value: +${currentQuestionValue}`;
+                    // Transition indicator color dashboard from Green to Orange as value decays
+                    if (currentQuestionValue <= 10) {
+                        bonusMeterDisplay.style.backgroundColor = "#e67e22";
+                    } else {
+                        bonusMeterDisplay.style.backgroundColor = "#2ecc71";
+                    }
+                }
 
                 activeBubbles.forEach(bubble => {
                     bubble.progress = progress;
@@ -466,11 +499,13 @@
 
             if (action === "hit" && isCorrect) {
                 playSound("correct");
-                if (currentPlayer === 1) p1Score += 10; else p2Score += 10;
+                // Award the dynamic countdown value recorded at collision intersection time
+                if (currentPlayer === 1) p1Score += currentQuestionValue; else p2Score += currentQuestionValue;
+                
                 feedbackBox.style.borderColor = '#2ecc71';
-                feedbackTitle.innerText = "🎉 正確 (CORRECT!)";
+                feedbackTitle.innerText = `🎉 正確 (+${currentQuestionValue} POINTS!)`;
                 feedbackTitle.style.color = '#2ecc71';
-                feedbackText.innerHTML = "太棒了！你選到了正確的句子！<br><br>" + currentRoundQuestion.exp;
+                feedbackText.innerHTML = `太棒了！你選到了正確的句子！因答題速度，獲得了 <b>${currentQuestionValue}</b> 分！<br><br>${currentRoundQuestion.exp}`;
             } else {
                 playSound("wrong"); 
                 if (currentPlayer === 1) p1Score = Math.max(0, p1Score - 5); else p2Score = Math.max(0, p2Score - 5);
