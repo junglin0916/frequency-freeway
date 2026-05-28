@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frequency Freeway - 3D Classroom Edition</title>
+    <title>Frequency Freeway - Ultra-Slow 3D Classroom Edition</title>
     <style>
         body {
             margin: 0;
@@ -204,7 +204,7 @@
         let activeBubbles = [];
         let musicInterval = null;
 
-        // Expanded 15-Question Database from Worksheet Structure
+        // Full 15-Question Database from Worksheet Structure
         const quizDatabase = [
             {
                 chinese: "你週末會去騎腳踏車嗎？ (提示：用 do 開頭問句)",
@@ -354,7 +354,6 @@
         // --- 3D ENVIRONMENT GEOMETRY LOGIC ---
         function updateCarDisplay() {
             const width = window.innerWidth;
-            // Place car at calculated bottom focal spacing lane marks
             if (carLane === 0) {
                 car.style.left = (width * 0.5 - 200) + 'px';
             } else {
@@ -407,7 +406,6 @@
             const correctLane = Math.floor(Math.random() * 2);
             const screenWidth = window.innerWidth;
 
-            // Instantiating 3D Scaling Objects
             const lanes = [0, 1];
             lanes.forEach(laneIndex => {
                 const bubbleElement = document.createElement('div');
@@ -421,11 +419,10 @@
                     element: bubbleElement,
                     isCorrect: isCorrect,
                     lane: laneIndex,
-                    progress: 0 // 0% at horizon, 100% hits car
+                    progress: 0
                 });
             });
 
-            // 3D Perspective Animation Loop
             let progress = 0;
             const interval = setInterval(() => {
                 if (!gameActive) {
@@ -433,17 +430,15 @@
                     return;
                 }
 
-                // SPEED DROPPED SIGNIFICANTLY DOWN TO 0.7 FOR PROJECTOR READABILITY
-                progress += 0.7; 
+                // SPEED DROPPED 10 TIMES SLOWER: FROM 0.7 DOWN TO 0.07 FOR ABSOLUTE READABILITY
+                progress += 0.07; 
 
                 activeBubbles.forEach(bubble => {
                     bubble.progress = progress;
                     
-                    // Map 3D coordinates based on depth progress ratio
-                    const scale = 0.2 + (bubble.progress / 100) * 0.9; // Grows larger as it approaches
+                    const scale = 0.2 + (bubble.progress / 100) * 0.9; 
                     const verticalPos = 240 + (bubble.progress / 100) * (window.innerHeight - 380);
                     
-                    // Spread elements wider horizontally as they approach the foreground
                     const laneOffset = bubble.lane === 0 ? -90 - (bubble.progress * 3.2) : 90 + (bubble.progress * 3.2);
                     const horizontalPos = (screenWidth * 0.5) + laneOffset;
 
@@ -452,11 +447,9 @@
                     bubble.element.style.transform = `translate(-50%, -50%) scale(${scale})`;
                 });
 
-                // Check collision depth intersection triggers
                 if (progress >= 92) { 
                     clearInterval(interval);
                     
-                    // Evaluate if the car lane matches the bubble location at intersection depth
                     const targetedBubble = activeBubbles.find(b => b.lane === carLane);
                     if (targetedBubble) {
                         processResult(targetedBubble.isCorrect, "hit");
@@ -479,7 +472,7 @@
                 feedbackTitle.style.color = '#2ecc71';
                 feedbackText.innerHTML = "太棒了！你選到了正確的句子！<br><br>" + currentRoundQuestion.exp;
             } else {
-                playSound("wrong"); // Fart audio trigger
+                playSound("wrong"); 
                 if (currentPlayer === 1) p1Score = Math.max(0, p1Score - 5); else p2Score = Math.max(0, p2Score - 5);
                 feedbackBox.style.borderColor = '#e74c3c';
                 feedbackTitle.innerText = "💨 答錯或漏掉囉 (INCORRECT!)";
