@@ -3,140 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frequency Freeway - Complete Classroom Edition with Music & Fun SFX</title>
+    <title>Frequency Freeway - 3D Classroom Edition</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            background: #1a1a1a;
+            background: #0d0d1a;
             font-family: 'Arial', sans-serif;
             overflow: hidden;
             color: white;
             user-select: none;
+            perspective: 800px; /* Activates global 3D space environment */
         }
         #game-container {
             position: relative;
             width: 100vw;
             height: 100vh;
-            background: linear-gradient(to bottom, #111 40%, #2c3e50 100%);
+            background: linear-gradient(to bottom, #050510 20%, #1a1a3a 50%, #0a0a14 100%);
+            overflow: hidden;
         }
-        /* Center Divider for 2 Choice Lanes */
-        .lane {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: dashed #fff;
-            opacity: 0.4;
-        }
-        /* Giant Car */
-        #car {
-            position: absolute;
-            bottom: 40px;
-            width: 110px;
-            height: 170px;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            transition: left 0.15s ease-out, background-color 0.3s;
-            z-index: 10;
-        }
-        #car::before {
-            content: '';
-            position: absolute;
-            top: 35px; left: 15px; width: 80px; height: 35px;
-            background: #2c3e50; border-radius: 5px;
-        }
-        /* Giant Target Prompt Box */
+
+        /* Fixed Top Prompt Box - Layered safely above everything */
         #prompt-box {
             position: absolute;
-            top: 130px;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
             background: #f1c40f;
             color: #111;
-            padding: 15px 40px;
-            font-size: 32px;
+            padding: 15px 30px;
+            font-size: 30px;
             font-weight: bold;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-            z-index: 20;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            z-index: 100; /* Highest priority layer: can never be blocked */
             text-align: center;
-            width: 75%;
+            width: 80%;
+            max-width: 900px;
             line-height: 1.4;
+            border: 3px solid #fff;
         }
-        /* Giant Sentence Bubbles */
-        .bubble {
-            position: absolute;
-            width: 340px;
-            height: 180px;
-            background: rgba(41, 128, 185, 0.95);
-            border: 5px solid #3498db;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 15px;
-            box-sizing: border-box;
-            font-size: 26px;
-            font-weight: bold;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
-        /* Header UI */
+
+        /* Header UI Scoreboard Layered safely just below prompt box */
         #ui-header {
             position: absolute;
-            top: 20px;
+            top: 170px;
             left: 5%;
             right: 5%;
             display: flex;
             justify-content: space-between;
-            background: rgba(0,0,0,0.85);
-            padding: 15px 30px;
-            border-radius: 10px;
-            border: 2px solid #555;
-            z-index: 25;
+            align-items: center;
+            background: rgba(0,0,0,0.8);
+            padding: 10px 25px;
+            border-radius: 8px;
+            border: 2px solid #444;
+            z-index: 90;
         }
-        .score-box { font-size: 32px; font-weight: bold; }
-        #turn-indicator { font-size: 34px; font-weight: bold; text-align: center; }
-        
-        /* Educational Feedback Modal */
+        .score-box { font-size: 28px; font-weight: bold; }
+        #turn-indicator { font-size: 30px; font-weight: bold; text-align: center; }
+
+        /* 3D 3-Dimensional Highway Canvas Track */
+        #highway-3d {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 1000px;
+            height: 75vh;
+            background: #252530;
+            transform: translateX(-50%) rotateX(60deg); /* Tilts the road down away from screen */
+            transform-origin: bottom center;
+            border-left: 10px solid #f1c40f;
+            border-right: 10px solid #f1c40f;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+            z-index: 5;
+        }
+        /* Center Lanes Divider Dash Inside the 3D grid */
+        .lane-divider {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 8px;
+            background: dashed #fff;
+            opacity: 0.6;
+            transform: translateX(-50%);
+        }
+
+        /* 3D Projector Optimized Car */
+        #car {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            width: 130px;
+            height: 90px;
+            border-radius: 15px 15px 8px 8px;
+            transform: translateX(-50%) rotateX(25deg); /* Tilted perspective adjustment */
+            transform-origin: bottom center;
+            transition: left 0.15s ease-out, background-color 0.3s;
+            z-index: 50; /* Above the road, beneath menus */
+        }
+        /* Windshield glass structure effect */
+        #car::before {
+            content: '';
+            position: absolute;
+            top: 15px; left: 15px; width: 100px; height: 25px;
+            background: #a2c4c9; border-radius: 4px; opacity: 0.8;
+        }
+
+        /* Giant 3D Floating Speech Bubbles scaling outward from the horizon */
+        .bubble {
+            position: absolute;
+            width: 360px;
+            height: 180px;
+            background: rgba(41, 128, 185, 0.95);
+            border: 6px solid #3498db;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            font-size: 26px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.9);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.7);
+            z-index: 20;
+            transform-origin: center center;
+            /* Starts flat to simulate distant depth scale ratio styling */
+            transform: translate(-50%, -50%) scale(0.3); 
+        }
+
+        /* Educational Review Popup overlay window */
         #feedback {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(15, 15, 15, 0.98);
+            background: rgba(10, 10, 20, 0.98);
             border: 6px solid #fff;
             padding: 40px;
             border-radius: 20px;
             text-align: center;
             display: none;
-            z-index: 30;
-            width: 75%;
+            z-index: 200; /* Ensures absolute top foreground visual delivery */
+            width: 80%;
             max-width: 850px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            box-shadow: 0 0 60px rgba(0,0,0,0.9);
         }
         #feedback h2 { font-size: 55px; margin-top: 0; }
         #feedback p { font-size: 32px; line-height: 1.6; margin: 30px 0; }
         #feedback button {
             background: #2ecc71; border: none; padding: 20px 60px;
-            color: white; font-size: 32px; font-weight: bold; border-radius: 10px; cursor: pointer;
+            color: white; font-size: 32px; font-weight: bold; border-radius: 12px; cursor: pointer;
         }
     </style>
 </head>
 <body>
 
     <div id="game-container">
-        <div class="lane" style="left: 50%;"></div>
+        <div id="prompt-box">請點擊畫面的任一處以啟動3D遊戲！<br>(Click anywhere to start 3D game!)</div>
 
         <div id="ui-header">
             <div class="score-box" style="color: #e74c3c;">P1 (Red): <span id="p1-score">0</span></div>
-            <div id="turn-indicator">Player 1's Turn (Click Screen to Start)</div>
+            <div id="turn-indicator">Player 1's Turn</div>
             <div class="score-box" style="color: #3498db;">P2 (Blue): <span id="p2-score">0</span></div>
         </div>
 
-        <div id="prompt-box">請點擊畫面的任一處以啟動音樂與遊戲！<br>(Click anywhere to start music & play!)</div>
+        <div id="highway-3d">
+            <div class="lane-divider"></div>
+        </div>
+
         <div id="car"></div>
 
         <div id="feedback">
@@ -160,16 +197,15 @@
         let p1Score = 0;
         let p2Score = 0;
         let currentPlayer = 1;
-        let carLane = 0; // 0: Left Lane, 1: Right Lane
+        let carLane = 0; // 0: Left, 1: Right
         let gameActive = false; 
         let audioCtx = null;
         let currentRoundQuestion = null;
         let activeBubbles = [];
         let musicInterval = null;
 
-        // Full 15-Question Database from Worksheet Structure
+        // Expanded 15-Question Database from Worksheet Structure
         const quizDatabase = [
-            // --- FOCUS: Action Verbs ("I sometimes do" / "He/She sometimes does") ---
             {
                 chinese: "你週末會去騎腳踏車嗎？ (提示：用 do 開頭問句)",
                 correct: "Do you go bicycle riding on weekends?",
@@ -192,7 +228,7 @@
                 chinese: "他放學後常常打籃球嗎？ (提示：主詞為單數 he)",
                 correct: "Does he often play basketball after school?",
                 wrong: "Is he often play basketball after school?",
-                exp: "一般動詞 play 的問句用 Does he...？ 簡答對應為：'He sometimes does'（或自己回答 'I sometimes do'）。"
+                exp: "一般動詞 play 的問句用 Does he...？ 簡答對應為：'He sometimes does'。"
             },
             {
                 chinese: "他們有時候走路去上學。 (有時候：sometimes)",
@@ -204,7 +240,7 @@
                 chinese: "我姐姐很少在晚上洗澡。 (很少：seldom)",
                 correct: "My sister seldom takes a bath at night.",
                 wrong: "My sister takes seldom a bath at night.",
-                exp: "頻率副詞位置：頻率副詞 + 一般動詞 (seldom takes)。簡答對應形式為 'She sometimes does'。"
+                exp: "頻率副詞位置：頻率副詞 + 一般動詞 (seldom takes)。"
             },
             {
                 chinese: "她會和她媽媽一起去購物。 (有時候：sometimes)",
@@ -224,8 +260,6 @@
                 wrong: "What usually do you do on Saturday night?",
                 exp: "問句結構為：疑問詞 + do + 主詞 + usually + 動詞原型。習慣問句簡答：'I sometimes do.'"
             },
-
-            // --- CONTRAST: "To Be" Verbs ("I sometimes am" / "It is") ---
             {
                 chinese: "我上學從不遲到。 (從不：never)",
                 correct: "I am never late for school.",
@@ -245,7 +279,7 @@
                 exp: "位置規則：be動詞 + 頻率副詞 (is usually)。天氣簡答型態：'It usually is.'"
             },
             {
-                chinese: "Mandy上學常常遲到. (常常：often)",
+                chinese: "Mandy上學常常遲到。 (常常：often)",
                 correct: "Mandy is often late for school.",
                 wrong: "Mandy often is late for school.",
                 exp: "位置規則：be動詞 + 頻率副詞 (is often)。他人詢問時簡答要說：'She sometimes is.'"
@@ -254,7 +288,7 @@
                 chinese: "你上班總是很早到嗎？ (通常：usually)",
                 correct: "Are you usually early to work?",
                 wrong: "Do you usually early to work?",
-                exp: "early 是形容詞，問句要用 be動詞問：Are you...？ 被這樣問時，你的簡答必須是：'I sometimes am.' (不能選 do！)"
+                exp: "early 是形容詞，問句要用 be動詞問：Are you...？ 被這樣問時，你的簡答必須是：'I sometimes am.'"
             },
             {
                 chinese: "我媽媽在早上總是變得很忙碌。 (重組練習)",
@@ -264,7 +298,7 @@
             }
         ];
 
-        // --- CODE-BASED AUDIO GENERATOR ENGINE ---
+        // --- AUDIO COMPONENT ENGINE ---
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -272,45 +306,27 @@
             }
         }
 
-        // Background Music Melody Setup
         function startBackgroundMusic() {
-            // Cheerful looping game show style baseline theme
-            // Sequence of notes: C4, E4, G4, E4, F4, A4, C5, A4
             const notes = [261.63, 329.63, 392.00, 329.63, 349.23, 440.00, 523.25, 440.00];
             let step = 0;
-
             musicInterval = setInterval(() => {
-                if (!audioCtx || audioCtx.state === 'suspended') return;
-                
-                // Only play background music when the quiz screen is running actively
-                if (!gameActive) return;
-
+                if (!audioCtx || !gameActive) return;
                 let osc = audioCtx.createOscillator();
                 let gainNode = audioCtx.createGain();
-                
-                osc.type = "triangle"; // Smooth, retro vibe sound
+                osc.type = "triangle";
                 osc.frequency.setValueAtTime(notes[step % notes.length], audioCtx.currentTime);
-                
-                gainNode.gain.setValueAtTime(0.04, audioCtx.currentTime); // Soft volume level
+                gainNode.gain.setValueAtTime(0.04, audioCtx.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
-                
-                osc.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.4);
-                
+                osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.4);
                 step++;
-            }, 400); // Speed tempo of music
+            }, 450);
         }
 
         function playSound(type) {
             if (!audioCtx) return;
-            
             let now = audioCtx.currentTime;
-
             if (type === "correct") {
-                // High Pitch Win Chime
                 let osc = audioCtx.createOscillator();
                 let gainNode = audioCtx.createGain();
                 osc.type = "sine";
@@ -321,63 +337,43 @@
                 gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
                 osc.connect(gainNode); gainNode.connect(audioCtx.destination);
                 osc.start(now); osc.stop(now + 0.5);
-            } 
-            else if (type === "wrong" || type === "miss") {
-                // --- CUSTOM SYNTHETIC FART SOUND EFFECT Generator ---
-                // Farts consist of very low frequencies, raw sawtooth/square waves, and fluctuating frequency pitch curves
+            } else if (type === "wrong" || type === "miss") {
                 let osc1 = audioCtx.createOscillator();
                 let osc2 = audioCtx.createOscillator();
                 let gainNode = audioCtx.createGain();
-
-                osc1.type = "sawtooth";
-                osc2.type = "sawtooth";
-
-                // Ultra low pitch with rapid slide downward to create the flapping tone
-                osc1.frequency.setValueAtTime(85, now);
-                osc1.frequency.linearRampToValueAtTime(45, now + 0.4);
-
-                osc2.frequency.setValueAtTime(82, now); // Slight detune for a rougher rumble
-                osc2.frequency.linearRampToValueAtTime(40, now + 0.4);
-
-                // Quick initial volume pop, fading out roughly
+                osc1.type = "sawtooth"; osc2.type = "sawtooth";
+                osc1.frequency.setValueAtTime(85, now); osc1.frequency.linearRampToValueAtTime(45, now + 0.4);
+                osc2.frequency.setValueAtTime(82, now); osc2.frequency.linearRampToValueAtTime(40, now + 0.4);
                 gainNode.gain.setValueAtTime(0.4, now);
-                gainNode.gain.linearRampToValueAtTime(0.3, now + 0.2);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
-
-                osc1.connect(gainNode);
-                osc2.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-
-                osc1.start(now);
-                osc2.start(now);
-                osc1.stop(now + 0.45);
-                osc2.stop(now + 0.45);
+                osc1.connect(gainNode); osc2.connect(gainNode); gainNode.connect(audioCtx.destination);
+                osc1.start(now); osc2.start(now); osc1.stop(now + 0.45); osc2.stop(now + 0.45);
             }
         }
 
-        // --- GAME PLAY LOGIC ---
-        function updateCar() {
-            const screenWidth = window.innerWidth;
+        // --- 3D ENVIRONMENT GEOMETRY LOGIC ---
+        function updateCarDisplay() {
+            const width = window.innerWidth;
+            // Place car at calculated bottom focal spacing lane marks
             if (carLane === 0) {
-                car.style.left = (screenWidth * 0.25 - 55) + 'px';
+                car.style.left = (width * 0.5 - 200) + 'px';
             } else {
-                car.style.left = (screenWidth * 0.75 - 55) + 'px';
+                car.style.left = (width * 0.5 + 200) + 'px';
             }
 
             if (currentPlayer === 1) {
-                car.style.backgroundColor = '#e74c3c'; // Red Sports Car
-                car.style.boxShadow = '0 0 25px rgba(231, 76, 60, 0.8), inset 0 35px 0 #c0392b';
+                car.style.backgroundColor = '#e74c3c';
+                car.style.boxShadow = '0 12px 25px rgba(231, 76, 60, 0.8), inset 0 -15px 0 #c0392b';
                 turnIndicator.innerText = "👉 Player 1 (Red Car) 👈";
                 turnIndicator.style.color = '#e74c3c';
             } else {
-                car.style.backgroundColor = '#3498db'; // Blue Sports Car
-                car.style.boxShadow = '0 0 25px rgba(52, 152, 219, 0.8), inset 0 35px 0 #2980b9';
+                car.style.backgroundColor = '#3498db';
+                car.style.boxShadow = '0 12px 25px rgba(52, 152, 219, 0.8), inset 0 -15px 0 #2980b9';
                 turnIndicator.innerText = "👉 Player 2 (Blue Car) 👈";
                 turnIndicator.style.color = '#3498db';
             }
         }
 
-        // Click to boot up engine
         window.addEventListener('click', () => {
             if (!audioCtx) {
                 initAudio();
@@ -386,16 +382,15 @@
             }
         });
 
-        // Key listeners
         window.addEventListener('keydown', (e) => {
             if (!gameActive) return;
             if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
                 carLane = 0;
-                updateCar();
+                updateCarDisplay();
             }
             if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
                 carLane = 1;
-                updateCar();
+                updateCarDisplay();
             }
         });
 
@@ -407,60 +402,73 @@
 
             currentRoundQuestion = quizDatabase[Math.floor(Math.random() * quizDatabase.length)];
             promptBox.innerText = "請找出正確的句子：\n" + currentRoundQuestion.chinese;
-            updateCar();
+            updateCarDisplay();
 
-            const correctLane = Math.floor(Math.random() * 2); 
+            const correctLane = Math.floor(Math.random() * 2);
             const screenWidth = window.innerWidth;
 
-            // Correct Option
-            const bCorrect = document.createElement('div');
-            bCorrect.className = 'bubble';
-            bCorrect.innerText = currentRoundQuestion.correct;
-            bCorrect.style.left = (correctLane === 0 ? (screenWidth * 0.25 - 170) : (screenWidth * 0.75 - 170)) + 'px';
-            bCorrect.style.top = '-200px';
-            container.appendChild(bCorrect);
-            activeBubbles.push({ element: bCorrect, isCorrect: true, lane: correctLane });
+            // Instantiating 3D Scaling Objects
+            const lanes = [0, 1];
+            lanes.forEach(laneIndex => {
+                const bubbleElement = document.createElement('div');
+                bubbleElement.className = 'bubble';
+                
+                const isCorrect = (laneIndex === correctLane);
+                bubbleElement.innerText = isCorrect ? currentRoundQuestion.correct : currentRoundQuestion.wrong;
+                
+                container.appendChild(bubbleElement);
+                activeBubbles.push({
+                    element: bubbleElement,
+                    isCorrect: isCorrect,
+                    lane: laneIndex,
+                    progress: 0 // 0% at horizon, 100% hits car
+                });
+            });
 
-            // Faulty Option
-            const bWrong = document.createElement('div');
-            bWrong.className = 'bubble';
-            bWrong.innerText = currentRoundQuestion.wrong;
-            bWrong.style.left = (correctLane === 0 ? (screenWidth * 0.75 - 170) : (screenWidth * 0.25 - 170)) + 'px';
-            bWrong.style.top = '-200px';
-            container.appendChild(bWrong);
-            activeBubbles.push({ element: bWrong, isCorrect: false, lane: (correctLane === 0 ? 1 : 0) });
-
-            let topPos = -200;
+            // 3D Perspective Animation Loop
+            let progress = 0;
             const interval = setInterval(() => {
                 if (!gameActive) {
                     clearInterval(interval);
                     return;
                 }
 
-                topPos += 1.20; 
-                bCorrect.style.top = topPos + 'px';
-                bWrong.style.top = topPos + 'px';
+                // SPEED DROPPED SIGNIFICANTLY DOWN TO 0.7 FOR PROJECTOR READABILITY
+                progress += 0.7; 
 
-                const carRect = car.getBoundingClientRect();
-                
                 activeBubbles.forEach(bubble => {
-                    const bRect = bubble.element.getBoundingClientRect();
-                    if (bRect.bottom >= carRect.top && bRect.top <= carRect.bottom && bubble.lane === carLane) {
-                        clearInterval(interval);
-                        processResult(bubble.isCorrect, "hit");
-                    }
+                    bubble.progress = progress;
+                    
+                    // Map 3D coordinates based on depth progress ratio
+                    const scale = 0.2 + (bubble.progress / 100) * 0.9; // Grows larger as it approaches
+                    const verticalPos = 240 + (bubble.progress / 100) * (window.innerHeight - 380);
+                    
+                    // Spread elements wider horizontally as they approach the foreground
+                    const laneOffset = bubble.lane === 0 ? -90 - (bubble.progress * 3.2) : 90 + (bubble.progress * 3.2);
+                    const horizontalPos = (screenWidth * 0.5) + laneOffset;
+
+                    bubble.element.style.top = verticalPos + 'px';
+                    bubble.element.style.left = horizontalPos + 'px';
+                    bubble.element.style.transform = `translate(-50%, -50%) scale(${scale})`;
                 });
 
-                if (topPos > window.innerHeight - 100) {
+                // Check collision depth intersection triggers
+                if (progress >= 92) { 
                     clearInterval(interval);
-                    processResult(false, "miss");
+                    
+                    // Evaluate if the car lane matches the bubble location at intersection depth
+                    const targetedBubble = activeBubbles.find(b => b.lane === carLane);
+                    if (targetedBubble) {
+                        processResult(targetedBubble.isCorrect, "hit");
+                    } else {
+                        processResult(false, "miss");
+                    }
                 }
-
-            }, 10);
+            }, 16);
         }
 
         function processResult(isCorrect, action) {
-            gameActive = false; // Pauses loop and halts background background track note ticks
+            gameActive = false;
             feedbackBox.style.display = 'block';
 
             if (action === "hit" && isCorrect) {
@@ -470,20 +478,13 @@
                 feedbackTitle.innerText = "🎉 正確 (CORRECT!)";
                 feedbackTitle.style.color = '#2ecc71';
                 feedbackText.innerHTML = "太棒了！你選到了正確的句子！<br><br>" + currentRoundQuestion.exp;
-            } else if (action === "hit" && !isCorrect) {
-                playSound("wrong"); // Fart Sound
+            } else {
+                playSound("wrong"); // Fart audio trigger
                 if (currentPlayer === 1) p1Score = Math.max(0, p1Score - 5); else p2Score = Math.max(0, p2Score - 5);
                 feedbackBox.style.borderColor = '#e74c3c';
-                feedbackTitle.innerText = "💨 答錯了 (WRONG SENTENCE!)";
+                feedbackTitle.innerText = "💨 答錯或漏掉囉 (INCORRECT!)";
                 feedbackTitle.style.color = '#e74c3c';
-                feedbackText.innerHTML = "撞到錯誤的句子囉！噗～～扣 5 分！<br><br>" + currentRoundQuestion.exp;
-            } else if (action === "miss") {
-                playSound("miss"); // Fart Sound
-                if (currentPlayer === 1) p1Score = Math.max(0, p1Score - 5); else p2Score = Math.max(0, p2Score - 5);
-                feedbackBox.style.borderColor = '#f39c12';
-                feedbackTitle.innerText = "💨 漏掉了 (MISSED IT!)";
-                feedbackTitle.style.color = '#f39c12';
-                feedbackText.innerHTML = "你完全沒去接正確的句子！噗～～扣 5 分！<br>正確答案是：<br><b>" + currentRoundQuestion.correct + "</b>";
+                feedbackText.innerHTML = "噗～～答案不對或漏掉了！扣 5 分！<br>正確答案是：<br><b>" + currentRoundQuestion.correct + "</b><br><br>" + currentRoundQuestion.exp;
             }
 
             p1ScoreDisplay.innerText = p1Score;
@@ -496,10 +497,10 @@
             activeBubbles = [];
             
             currentPlayer = currentPlayer === 1 ? 2 : 1;
-            updateCar();
+            updateCarDisplay();
             
-            gameActive = true; // Resumes background loop melody automatically
-            setTimeout(startRound, 1000);
+            gameActive = true;
+            setTimeout(startRound, 800);
         }
     </script>
 </body>
