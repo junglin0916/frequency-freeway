@@ -3,23 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frequency Freeway - Ultra-Slow 3D Classroom Edition (Pro Scoring)</title>
+    <title>Frequency Freeway - High-Speed Mouse 3D Racer</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            background: #0d0d1a;
+            background: #090915;
             font-family: 'Arial', sans-serif;
             overflow: hidden;
             color: white;
             user-select: none;
-            perspective: 800px; /* Activates global 3D space environment */
+            perspective: 1000px; /* Enhanced true 3D spatial field perspective depth */
+            cursor: crosshair; /* Changes mouse cursor to a targeting reticle over the game */
         }
         #game-container {
             position: relative;
             width: 100vw;
             height: 100vh;
-            background: linear-gradient(to bottom, #050510 20%, #1a1a3a 50%, #0a0a14 100%);
+            background: linear-gradient(to bottom, #020208 15%, #111126 45%, #05050d 100%);
             overflow: hidden;
         }
 
@@ -71,6 +72,7 @@
             font-size: 24px;
             font-weight: bold;
             box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+            transition: background-color 0.2s;
         }
 
         /* 3D 3-Dimensional Highway Canvas Track */
@@ -78,53 +80,56 @@
             position: absolute;
             bottom: 0;
             left: 50%;
-            width: 1000px;
-            height: 75vh;
-            background: #252530;
-            transform: translateX(-50%) rotateX(60deg); /* Tilts the road down away from screen */
+            width: 1200px;
+            height: 78vh;
+            background: #1e1e24;
+            transform: translateX(-50%) rotateX(65deg); /* Slanted 3D road perspective matrix */
             transform-origin: bottom center;
-            border-left: 10px solid #f1c40f;
-            border-right: 10px solid #f1c40f;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+            border-left: 12px solid #f1c40f;
+            border-right: 12px solid #f1c40f;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.9);
             z-index: 5;
+            overflow: hidden;
         }
-        /* Center Lanes Divider Dash Inside the 3D grid */
+        /* Center Lanes Divider Dash Inside the 3D grid with arcade scrolling trick */
         .lane-divider {
             position: absolute;
-            top: 0;
-            bottom: 0;
+            top: -100px;
+            bottom: -100px;
             left: 50%;
-            width: 8px;
-            background: dashed #fff;
-            opacity: 0.6;
+            width: 10px;
+            background: repeating-linear-gradient(to bottom, #fff 0px, #fff 40px, transparent 40px, transparent 80px);
+            opacity: 0.7;
             transform: translateX(-50%);
         }
 
-        /* 3D Projector Optimized Car */
+        /* High-Velocity Mouse Controlled Car */
         #car {
             position: absolute;
-            bottom: 50px;
+            bottom: 60px;
             left: 50%;
-            width: 130px;
-            height: 90px;
-            border-radius: 15px 15px 8px 8px;
-            transform: translateX(-50%) rotateX(25deg); /* Tilted perspective adjustment */
+            width: 140px;
+            height: 95px;
+            border-radius: 18px 18px 10px 10px;
+            transform: translateX(-50%) rotateX(20deg); /* Counter-angled aerodynamic 3D skew */
             transform-origin: bottom center;
-            transition: left 0.15s ease-out, background-color 0.3s;
-            z-index: 50; /* Above the road, beneath menus */
+            z-index: 50; /* Hovers perfectly above the road floor */
+            pointer-events: none; /* Prevents the car element from blocking underlying mouse events */
+            box-shadow: 0 15px 30px rgba(0,0,0,0.7);
         }
-        /* Windshield glass structure effect */
+        /* Internal windshield design */
         #car::before {
             content: '';
             position: absolute;
-            top: 15px; left: 15px; width: 100px; height: 25px;
-            background: #a2c4c9; border-radius: 4px; opacity: 0.8;
+            top: 15px; left: 18px; width: 104px; height: 25px;
+            background: #a2c4c9; border-radius: 5px; opacity: 0.85;
+            box-shadow: inset 0 2px 5px rgba(255,255,255,0.5);
         }
 
-        /* Giant 3D Floating Speech Bubbles scaling outward from the horizon */
+        /* Giant 3D Speech Bubbles extending dynamically through depth fields */
         .bubble {
             position: absolute;
-            width: 360px;
+            width: 370px;
             height: 180px;
             background: rgba(41, 128, 185, 0.95);
             border: 6px solid #3498db;
@@ -139,11 +144,11 @@
             font-weight: bold;
             color: white;
             text-shadow: 2px 2px 5px rgba(0,0,0,0.9);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.7);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
             z-index: 20;
             transform-origin: center center;
-            /* Starts flat to simulate distant depth scale ratio styling */
-            transform: translate(-50%, -50%) scale(0.3); 
+            pointer-events: none; /* Mouse movements pass directly into game core logic */
+            transform: translate(-50%, -50%) scale(0.2); 
         }
 
         /* Educational Review Popup overlay window */
@@ -151,16 +156,16 @@
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(10, 10, 20, 0.98);
+            background: rgba(8, 8, 18, 0.99);
             border: 6px solid #fff;
-            padding: 40px;
+            padding: 45px;
             border-radius: 20px;
             text-align: center;
             display: none;
-            z-index: 200; /* Ensures absolute top foreground visual delivery */
+            z-index: 200; /* Overrides everything during grading cycles */
             width: 80%;
             max-width: 850px;
-            box-shadow: 0 0 60px rgba(0,0,0,0.9);
+            box-shadow: 0 0 70px rgba(0,0,0,0.95);
         }
         #feedback h2 { font-size: 55px; margin-top: 0; }
         #feedback p { font-size: 32px; line-height: 1.6; margin: 30px 0; }
@@ -173,7 +178,7 @@
 <body>
 
     <div id="game-container">
-        <div id="prompt-box">請點擊畫面的任一處以啟動3D遊戲！<br>(Click anywhere to start 3D game!)</div>
+        <div id="prompt-box">請點擊畫面的任一處以啟動滑鼠3D遊戲！<br>(Click anywhere to initialize Mouse 3D controls!)</div>
 
         <div id="ui-header">
             <div class="score-box" style="color: #e74c3c;">P1 (Red): <span id="p1-score">0</span></div>
@@ -183,7 +188,7 @@
         </div>
 
         <div id="highway-3d">
-            <div class="lane-divider"></div>
+            <div id="scrolling-divider" class="lane-divider"></div>
         </div>
 
         <div id="car"></div>
@@ -198,6 +203,7 @@
     <script>
         const container = document.getElementById('game-container');
         const car = document.getElementById('car');
+        const divider = document.getElementById('scrolling-divider');
         const promptBox = document.getElementById('prompt-box');
         const p1ScoreDisplay = document.getElementById('p1-score');
         const p2ScoreDisplay = document.getElementById('p2-score');
@@ -210,15 +216,17 @@
         let p1Score = 0;
         let p2Score = 0;
         let currentPlayer = 1;
-        let carLane = 0; // 0: Left, 1: Right
+        let carLane = 0; // 0: Left Lane, 1: Right Lane
         let gameActive = false; 
         let audioCtx = null;
         let currentRoundQuestion = null;
         let activeBubbles = [];
         let musicInterval = null;
-        let currentQuestionValue = 20; // Starts at max reward, ticks lower over time
+        
+        let currentQuestionValue = 20; 
+        let scrollOffset = 0;
 
-        // Full 15-Question Database from Worksheet Structure
+        // Structured Classroom Worksheet Dataset
         const quizDatabase = [
             {
                 chinese: "你週末會去騎腳踏車嗎？ (提示：用 do 開頭問句)",
@@ -312,7 +320,7 @@
             }
         ];
 
-        // --- AUDIO COMPONENT ENGINE ---
+        // --- CODE SYNTHESIZED AUDIO SYNTH ENGINE ---
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -365,28 +373,24 @@
             }
         }
 
-        // --- 3D ENVIRONMENT GEOMETRY LOGIC ---
-        function updateCarDisplay() {
-            const width = window.innerWidth;
-            if (carLane === 0) {
-                car.style.left = (width * 0.5 - 200) + 'px';
-            } else {
-                car.style.left = (width * 0.5 + 200) + 'px';
-            }
+        // --- HIGH VELOCITY MOUSE INTERACTION SYSTEM ---
+        window.addEventListener('mousemove', (e) => {
+            if (!gameActive) return;
 
-            if (currentPlayer === 1) {
-                car.style.backgroundColor = '#e74c3c';
-                car.style.boxShadow = '0 12px 25px rgba(231, 76, 60, 0.8), inset 0 -15px 0 #c0392b';
-                turnIndicator.innerText = "👉 Player 1 (Red Car) 👈";
-                turnIndicator.style.color = '#e74c3c';
-            } else {
-                car.style.backgroundColor = '#3498db';
-                car.style.boxShadow = '0 12px 25px rgba(52, 152, 219, 0.8), inset 0 -15px 0 #2980b9';
-                turnIndicator.innerText = "👉 Player 2 (Blue Car) 👈";
-                turnIndicator.style.color = '#3498db';
-            }
-        }
+            const screenWidth = window.innerWidth;
+            const mouseX = e.clientX;
 
+            // Track horizontal position and lock into lane assignments instantly based on crosshair coordinates
+            if (mouseX < screenWidth * 0.5) {
+                carLane = 0; // Left half of screen locks vehicle into left lane
+                car.style.left = (screenWidth * 0.5 - 220) + 'px';
+            } else {
+                carLane = 1; // Right half of screen locks vehicle into right lane
+                car.style.left = (screenWidth * 0.5 + 220) + 'px';
+            }
+        });
+
+        // Click wrapper handler to bypass modern browser audio autoplay policies
         window.addEventListener('click', () => {
             if (!audioCtx) {
                 initAudio();
@@ -395,17 +399,19 @@
             }
         });
 
-        window.addEventListener('keydown', (e) => {
-            if (!gameActive) return;
-            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
-                carLane = 0;
-                updateCarDisplay();
+        function updateCarSkin() {
+            if (currentPlayer === 1) {
+                car.style.backgroundColor = '#e74c3c'; // P1 Red Team racer
+                car.style.boxShadow = '0 12px 30px rgba(231, 76, 60, 0.7), inset 0 -15px 0 #c0392b';
+                turnIndicator.innerText = "👉 Player 1 (Red Car) - MOVE MOUSE 👈";
+                turnIndicator.style.color = '#e74c3c';
+            } else {
+                car.style.backgroundColor = '#3498db'; // P2 Blue Team racer
+                car.style.boxShadow = '0 12px 30px rgba(52, 152, 219, 0.7), inset 0 -15px 0 #2980b9';
+                turnIndicator.innerText = "👉 Player 2 (Blue Car) - MOVE MOUSE 👈";
+                turnIndicator.style.color = '#3498db';
             }
-            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-                carLane = 1;
-                updateCarDisplay();
-            }
-        });
+        }
 
         function startRound() {
             if (!gameActive) return;
@@ -413,14 +419,14 @@
             activeBubbles.forEach(b => b.element.remove());
             activeBubbles = [];
 
-            // Reset score value meter tracking metrics
+            // Reset score values and indicator frames for the new cycle
             currentQuestionValue = 20;
             bonusMeterDisplay.innerText = "Current Value: +20";
             bonusMeterDisplay.style.backgroundColor = "#2ecc71";
 
             currentRoundQuestion = quizDatabase[Math.floor(Math.random() * quizDatabase.length)];
             promptBox.innerText = "請找出正確的句子：\n" + currentRoundQuestion.chinese;
-            updateCarDisplay();
+            updateCarSkin();
 
             const correctLane = Math.floor(Math.random() * 2);
             const screenWidth = window.innerWidth;
@@ -449,18 +455,20 @@
                     return;
                 }
 
-                // 10 TIMES SLOWER SPEEDS RETAINED
+                // 10x Slow Speed Engine Kept Active for Reading Stability
                 progress += 0.07; 
 
-                // Dynamic score devaluation decay curve mapping
-                // Drop reward metrics proportionally down from 20 to 5 based on proximity distance depth progress
+                // Retro Arcade Highway Grid Texture Loop Effect
+                scrollOffset += 4;
+                divider.style.top = ((-100 + (scrollOffset % 80))) + 'px';
+
+                // Countdown Score Calculations Mapping Proximity Decay
                 let dynamicValue = Math.max(5, Math.round(20 - (progress / 92) * 15));
                 if (dynamicValue !== currentQuestionValue) {
                     currentQuestionValue = dynamicValue;
                     bonusMeterDisplay.innerText = `Current Value: +${currentQuestionValue}`;
-                    // Transition indicator color dashboard from Green to Orange as value decays
                     if (currentQuestionValue <= 10) {
-                        bonusMeterDisplay.style.backgroundColor = "#e67e22";
+                        bonusMeterDisplay.style.backgroundColor = "#e67e22"; // Warns the class of score bleed
                     } else {
                         bonusMeterDisplay.style.backgroundColor = "#2ecc71";
                     }
@@ -469,10 +477,10 @@
                 activeBubbles.forEach(bubble => {
                     bubble.progress = progress;
                     
-                    const scale = 0.2 + (bubble.progress / 100) * 0.9; 
+                    const scale = 0.2 + (bubble.progress / 100) * 0.95; 
                     const verticalPos = 240 + (bubble.progress / 100) * (window.innerHeight - 380);
                     
-                    const laneOffset = bubble.lane === 0 ? -90 - (bubble.progress * 3.2) : 90 + (bubble.progress * 3.2);
+                    const laneOffset = bubble.lane === 0 ? -90 - (bubble.progress * 3.4) : 90 + (bubble.progress * 3.4);
                     const horizontalPos = (screenWidth * 0.5) + laneOffset;
 
                     bubble.element.style.top = verticalPos + 'px';
@@ -480,6 +488,7 @@
                     bubble.element.style.transform = `translate(-50%, -50%) scale(${scale})`;
                 });
 
+                // Check depth interaction bounds
                 if (progress >= 92) { 
                     clearInterval(interval);
                     
@@ -499,15 +508,14 @@
 
             if (action === "hit" && isCorrect) {
                 playSound("correct");
-                // Award the dynamic countdown value recorded at collision intersection time
                 if (currentPlayer === 1) p1Score += currentQuestionValue; else p2Score += currentQuestionValue;
                 
                 feedbackBox.style.borderColor = '#2ecc71';
                 feedbackTitle.innerText = `🎉 正確 (+${currentQuestionValue} POINTS!)`;
                 feedbackTitle.style.color = '#2ecc71';
-                feedbackText.innerHTML = `太棒了！你選到了正確的句子！因答題速度，獲得了 <b>${currentQuestionValue}</b> 分！<br><br>${currentRoundQuestion.exp}`;
+                feedbackText.innerHTML = `太棒了！你選到了正確的句子！因答題速度，獲得了 <b>${currentQuestionValue}</b> 分！[cite: 1, 2]<br><br>${currentRoundQuestion.exp}`;
             } else {
-                playSound("wrong"); 
+                playSound("wrong"); // Fart audio trigger
                 if (currentPlayer === 1) p1Score = Math.max(0, p1Score - 5); else p2Score = Math.max(0, p2Score - 5);
                 feedbackBox.style.borderColor = '#e74c3c';
                 feedbackTitle.innerText = "💨 答錯或漏掉囉 (INCORRECT!)";
@@ -525,10 +533,9 @@
             activeBubbles = [];
             
             currentPlayer = currentPlayer === 1 ? 2 : 1;
-            updateCarDisplay();
             
             gameActive = true;
-            setTimeout(startRound, 800);
+            setTimeout(startRound, 600);
         }
     </script>
 </body>
