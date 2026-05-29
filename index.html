@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frequency Freeway - High-Speed Mouse 3D Racer</title>
+    <title>Frequency Freeway - Click to Rush 3D Edition</title>
     <style>
         body {
             margin: 0;
@@ -13,8 +13,8 @@
             overflow: hidden;
             color: white;
             user-select: none;
-            perspective: 1000px; /* Enhanced true 3D spatial field perspective depth */
-            cursor: crosshair; /* Changes mouse cursor to a targeting reticle over the game */
+            perspective: 1000px; /* True 3D spatial perspective */
+            cursor: pointer;
         }
         #game-container {
             position: relative;
@@ -72,7 +72,6 @@
             font-size: 24px;
             font-weight: bold;
             box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
-            transition: background-color 0.2s;
         }
 
         /* 3D 3-Dimensional Highway Canvas Track */
@@ -114,10 +113,9 @@
             transform: translateX(-50%) rotateX(20deg); /* Counter-angled aerodynamic 3D skew */
             transform-origin: bottom center;
             z-index: 50; /* Hovers perfectly above the road floor */
-            pointer-events: none; /* Prevents the car element from blocking underlying mouse events */
+            pointer-events: none; /* Prevents blocking underlying mouse events */
             box-shadow: 0 15px 30px rgba(0,0,0,0.7);
         }
-        /* Internal windshield design */
         #car::before {
             content: '';
             position: absolute;
@@ -147,7 +145,7 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.6);
             z-index: 20;
             transform-origin: center center;
-            pointer-events: none; /* Mouse movements pass directly into game core logic */
+            pointer-events: none;
             transform: translate(-50%, -50%) scale(0.2); 
         }
 
@@ -162,7 +160,7 @@
             border-radius: 20px;
             text-align: center;
             display: none;
-            z-index: 200; /* Overrides everything during grading cycles */
+            z-index: 200; 
             width: 80%;
             max-width: 850px;
             box-shadow: 0 0 70px rgba(0,0,0,0.95);
@@ -178,7 +176,7 @@
 <body>
 
     <div id="game-container">
-        <div id="prompt-box">請點擊畫面的任一處以啟動滑鼠3D遊戲！<br>(Click anywhere to initialize Mouse 3D controls!)</div>
+        <div id="prompt-box">請點擊畫面的任一處以啟動滑鼠3D遊戲！<br>(Click anywhere to start!)</div>
 
         <div id="ui-header">
             <div class="score-box" style="color: #e74c3c;">P1 (Red): <span id="p1-score">0</span></div>
@@ -216,7 +214,7 @@
         let p1Score = 0;
         let p2Score = 0;
         let currentPlayer = 1;
-        let carLane = 0; // 0: Left Lane, 1: Right Lane
+        let carLane = 0; 
         let gameActive = false; 
         let audioCtx = null;
         let currentRoundQuestion = null;
@@ -225,98 +223,132 @@
         
         let currentQuestionValue = 20; 
         let scrollOffset = 0;
+        let gameFirstStart = true;
+        let speedMultiplier = 1; // Used to accelerate the game when clicked
 
-        // Structured Classroom Worksheet Dataset
+        // Exact Database synchronized with your uploaded Worksheet document
         const quizDatabase = [
             {
-                chinese: "你週末會去騎腳踏車嗎？ (提示：用 do 開頭問句)",
-                correct: "Do you go bicycle riding on weekends?",
-                wrong: "Are you go bicycle riding on weekends?",
-                exp: "問句用 Do you...？ 回答就要用動詞助動詞簡答：'I sometimes do.'"
-            },
-            {
-                chinese: "你星期日通常在家做什麼？ (提示：日常習慣問句)",
+                chinese: "你星期日通常在家做什麼？ (Dialogue)",
                 correct: "What do you usually do on Sunday?",
-                wrong: "What are you usually do on Sunday?",
-                exp: "這是一般動詞問句！ 當被問到習慣時，簡答要配合助動詞：'I sometimes do.'"
+                wrong: "What usually do you do on Sunday?",
+                exp: "位置規則：疑問句結構為 'What do you + 頻率副詞 + 原形動詞...?'"
             },
             {
-                chinese: "我通常吃蛋 and 牛奶當早餐。 (通常：usually)",
-                correct: "I usually have eggs and milk for my breakfast.",
-                wrong: "I have usually eggs and milk for my breakfast.",
-                exp: "頻率副詞位置規則：頻率副詞 + 一般動詞 (usually have)。簡答代換為 'I sometimes do.'"
+                chinese: "你週末會去騎腳踏車嗎？ (Dialogue)",
+                correct: "Do you go bicycle riding on the weekend?",
+                wrong: "Are you go bicycle riding on the weekend?",
+                exp: "一般動詞問句使用助動詞 Do 開頭，不可與 be 動詞 Are 連用。"
             },
             {
-                chinese: "他放學後常常打籃球嗎？ (提示：主詞為單數 he)",
-                correct: "Does he often play basketball after school?",
-                wrong: "Is he often play basketball after school?",
-                exp: "一般動詞 play 的問句用 Does he...？ 簡答對應為：'He sometimes does'。"
-            },
-            {
-                chinese: "他們有時候走路去上學。 (有時候：sometimes)",
-                correct: "They sometimes walk to school.",
-                wrong: "They are sometimes walk to school.",
-                exp: "walk 是一般動詞，直接說 They sometimes walk 即可，不需要加 be動詞！此類別簡答用 do。"
-            },
-            {
-                chinese: "我姐姐很少在晚上洗澡。 (很少：seldom)",
-                correct: "My sister seldom takes a bath at night.",
-                wrong: "My sister takes seldom a bath at night.",
-                exp: "頻率副詞位置：頻率副詞 + 一般動詞 (seldom takes)。"
-            },
-            {
-                chinese: "她會和她媽媽一起去購物。 (有時候：sometimes)",
-                correct: "She sometimes goes shopping with her mom.",
-                wrong: "She goes sometimes shopping with her mom.",
-                exp: "加入頻率副詞要放在一般動詞 goes 的前面：'She sometimes goes...'。"
-            },
-            {
-                chinese: "你通常在什麼時候做功課？ (重組練習)",
-                correct: "When do you usually do your homework?",
-                wrong: "When you usually do do your homework?",
-                exp: "助動詞 do 要放在主詞 you 的前面。這種 action verb 問句的簡答也是 'I sometimes do.'"
-            },
-            {
-                chinese: "你星期六晚上通常做些什麼？ (日常習慣問句)",
-                correct: "What do you usually do on Saturday night?",
-                wrong: "What usually do you do on Saturday night?",
-                exp: "問句結構為：疑問詞 + do + 主詞 + usually + 動詞原型。習慣問句簡答：'I sometimes do.'"
-            },
-            {
-                chinese: "我上學從不遲到。 (從不：never)",
+                chinese: "我上學從不遲到。 (Sentence Pattern / Exercise 1)",
                 correct: "I am never late for school.",
-                wrong: "I never am late for school.",
-                exp: "注意 be動詞的規則：be動詞 + 頻率副詞 (am never)！被詢問時，簡答要用 'I sometimes am.'"
+                wrong: "I never am late to school.",
+                exp: "be動詞位置規則：be動詞 + 頻率副詞 (am never)。"
             },
             {
-                chinese: "他們在早上總是變得很忙碌。 (總是：always)",
+                chinese: "他們在早上總是變得很忙碌。 (Sentence Pattern)",
                 correct: "They are always busy in the morning.",
                 wrong: "They always are busy in the morning.",
-                exp: "位置規則：be動詞 + 頻率副詞 (are always)！簡答要對應 be動詞，不可誤用 do！"
+                exp: "位置規則：be動詞後面放頻率副詞 (are always)。"
             },
             {
-                chinese: "台灣夏天經常是下雨的。 (經常：usually)",
+                chinese: "台灣夏天經常是下雨的。 (Sentence Pattern / 重組題)",
                 correct: "It is usually rainy in summer.",
                 wrong: "It usually is rainy in summer.",
-                exp: "位置規則：be動詞 + 頻率副詞 (is usually)。天氣簡答型態：'It usually is.'"
+                exp: "位置規則：be動詞後面加上頻率副詞 (is usually)。"
             },
             {
-                chinese: "Mandy上學常常遲到。 (常常：often)",
+                chinese: "我常在公園騎腳踏車。 (Sentence Pattern)",
+                correct: "I often ride a bike in the park.",
+                wrong: "I ride often a bike in the park.",
+                exp: "一般動詞位置規則：頻率副詞要放在一般動詞前面 (often ride)。"
+            },
+            {
+                chinese: "他們有時候走路去上學。 (Sentence Pattern)",
+                correct: "They sometimes walk to school.",
+                wrong: "They are sometimes walk to school.",
+                exp: "walk 是一般動詞，句子中不需要多餘的 be 動詞 are。"
+            },
+            {
+                chinese: "她很少看電視。 (Sentence Pattern)",
+                correct: "She seldom watches TV.",
+                wrong: "She watches seldom TV.",
+                exp: "一般動詞前面放置頻率副詞 (seldom watches)，且主詞 She 為單數動詞加 es。"
+            },
+            {
+                chinese: "我上學從不遲到。 (Exercise 1 第三題)",
+                correct: "I am never late to school.",
+                wrong: "I am never late for school.",
+                exp: "本題配合學習單 Exercise 1 第3題填空句型：'I am never late to school.' 格式。"
+            },
+            {
+                chinese: "我姐姐很少在晚上洗澡。 (Exercise 1 第四題 / 加入詞練習)",
+                correct: "My sister seldom takes a bath at night.",
+                wrong: "My sister takes seldom a bath at night.",
+                exp: "一般動詞位置規則：頻率副詞 + 一般動詞 (seldom takes)。"
+            },
+            {
+                chinese: "我通常吃蛋和牛奶當早餐。 (將usually加入句子中)",
+                correct: "I usually have eggs and milk for my breakfast.",
+                wrong: "I have usually eggs and milk for my breakfast.",
+                exp: "一般動詞 has/have 前面要加頻率副詞 (usually have)。"
+            },
+            {
+                chinese: "Mandy上學常常遲到。 (將often加入句子中)",
                 correct: "Mandy is often late for school.",
                 wrong: "Mandy often is late for school.",
-                exp: "位置規則：be動詞 + 頻率副詞 (is often)。他人詢問時簡答要說：'She sometimes is.'"
+                exp: "be動詞位置規則：be動詞後面加上頻率副詞 (is often)。"
             },
             {
-                chinese: "你上班總是很早到嗎？ (通常：usually)",
+                chinese: "你上班總是很早到嗎？ (將usually加入句子中)",
                 correct: "Are you usually early to work?",
                 wrong: "Do you usually early to work?",
-                exp: "early 是形容詞，問句要用 be動詞問：Are you...？ 被這樣問時，你的簡答必須是：'I sometimes am.'"
+                exp: "early 為形容詞，問句必須使用 Be 動詞 Are 進行提問。"
             },
             {
-                chinese: "我媽媽在早上總是變得很忙碌。 (重組練習)",
+                chinese: "他放學後常常打籃球嗎？ (將often加入句子中)",
+                correct: "Does he often play basketball after school?",
+                wrong: "Is he often play basketball after school?",
+                exp: "play 是一般動詞，第三人稱單數問句使用助動詞 Does 開頭。"
+            },
+            {
+                chinese: "她會和她媽媽一起去購物。 (將sometimes加入句子中)",
+                correct: "She sometimes goes shopping with her mom.",
+                wrong: "She goes sometimes shopping with her mom.",
+                exp: "一般動詞前面要加上頻率副詞 (sometimes goes)。"
+            },
+            {
+                chinese: "你常遲到嗎?是喔 我很常。 (簡答時頻率副詞位置)",
+                correct: "Yes, I usually am.",
+                wrong: "Yes, I am usually.",
+                exp: "簡答時頻率副詞位置在be動詞後助動詞前面。"
+            },
+            {
+                chinese: "你媽常上班遲到嗎?是喔 她很常。 (簡答時頻率副詞位置)",
+                correct: "Yes, she usually does.",
+                wrong: "Yes, she does usually.",
+                exp: "簡答時頻率副詞位置在be動詞後助動詞前面。"
+            },
+
+
+            {
+                chinese: "你通常在什麼時候做功課？ (重組練習第一題)",
+                correct: "When do you usually do your homework?",
+                wrong: "When you usually do do your homework?",
+                exp: "特殊疑問句結構：疑問詞 When + 助動詞 do + 主詞 you + 頻率副詞 usually + 動詞原型 do。"
+            },
+            {
+                chinese: "我媽媽在早上總是變得很忙碌。 (重組練習第二題)",
                 correct: "My mother is always busy in the morning.",
                 wrong: "My mother always is busy in the morning.",
-                exp: "正確字序：主詞 + be動詞 + 頻率副詞 + 形容詞。"
+                exp: "正確順序：主詞 + be動詞 + 頻率副詞 (is always) + 形容詞。"
+            },
+            {
+                chinese: "你星期六晚上通常做些什麼？ (重組練習第六題)",
+                correct: "What do you usually do on Saturday night?",
+                wrong: "What you usually do do on Saturday night?",
+                exp: "正確順序：疑問詞 What + 助動詞 do + 主詞 you + usually + 原形動詞 do。"
             }
         ];
 
@@ -380,35 +412,40 @@
             const screenWidth = window.innerWidth;
             const mouseX = e.clientX;
 
-            // Track horizontal position and lock into lane assignments instantly based on crosshair coordinates
             if (mouseX < screenWidth * 0.5) {
-                carLane = 0; // Left half of screen locks vehicle into left lane
+                carLane = 0; 
                 car.style.left = (screenWidth * 0.5 - 220) + 'px';
             } else {
-                carLane = 1; // Right half of screen locks vehicle into right lane
+                carLane = 1; 
                 car.style.left = (screenWidth * 0.5 + 220) + 'px';
             }
         });
 
-        // Click wrapper handler to bypass modern browser audio autoplay policies
+        // Click wrapper handler: Starts the game first, then acts as the "RUSH/SLAM" button!
         window.addEventListener('click', () => {
-            if (!audioCtx) {
+            if (gameFirstStart) {
+                gameFirstStart = false;
                 initAudio();
                 gameActive = true;
                 startRound();
+            } else if (gameActive && speedMultiplier === 1) {
+                // RUSH MECHANISM TRIGGERED ON CLICK
+                speedMultiplier = 12; // Speed jumps 12x faster to rush answers instantly
+                bonusMeterDisplay.innerText = `RUSHING! Locked: +${currentQuestionValue}`;
+                bonusMeterDisplay.style.backgroundColor = "#9b59b6"; // Purple color indicating rushing state
             }
         });
 
         function updateCarSkin() {
             if (currentPlayer === 1) {
-                car.style.backgroundColor = '#e74c3c'; // P1 Red Team racer
+                car.style.backgroundColor = '#e74c3c'; 
                 car.style.boxShadow = '0 12px 30px rgba(231, 76, 60, 0.7), inset 0 -15px 0 #c0392b';
-                turnIndicator.innerText = "👉 Player 1 (Red Car) - MOVE MOUSE 👈";
+                turnIndicator.innerText = "👉 Player 1 (Red Car) - Click to SLAM! 👈";
                 turnIndicator.style.color = '#e74c3c';
             } else {
-                car.style.backgroundColor = '#3498db'; // P2 Blue Team racer
+                car.style.backgroundColor = '#3498db'; 
                 car.style.boxShadow = '0 12px 30px rgba(52, 152, 219, 0.7), inset 0 -15px 0 #2980b9';
-                turnIndicator.innerText = "👉 Player 2 (Blue Car) - MOVE MOUSE 👈";
+                turnIndicator.innerText = "👉 Player 2 (Blue Car) - Click to SLAM! 👈";
                 turnIndicator.style.color = '#3498db';
             }
         }
@@ -418,8 +455,8 @@
             
             activeBubbles.forEach(b => b.element.remove());
             activeBubbles = [];
+            speedMultiplier = 1; // Reset rush multiplier back to steady default pace
 
-            // Reset score values and indicator frames for the new cycle
             currentQuestionValue = 20;
             bonusMeterDisplay.innerText = "Current Value: +20";
             bonusMeterDisplay.style.backgroundColor = "#2ecc71";
@@ -455,22 +492,24 @@
                     return;
                 }
 
-                // 10x Slow Speed Engine Kept Active for Reading Stability
-                progress += 0.07; 
+                // Normal rate is 0.07 (very slow), but jumps to 0.84 when the mouse is clicked to rush answers!
+                let stepSpeed = 0.07 * speedMultiplier;
+                progress += stepSpeed; 
 
-                // Retro Arcade Highway Grid Texture Loop Effect
-                scrollOffset += 4;
+                scrollOffset += (4 * speedMultiplier);
                 divider.style.top = ((-100 + (scrollOffset % 80))) + 'px';
 
-                // Countdown Score Calculations Mapping Proximity Decay
-                let dynamicValue = Math.max(5, Math.round(20 - (progress / 92) * 15));
-                if (dynamicValue !== currentQuestionValue) {
-                    currentQuestionValue = dynamicValue;
-                    bonusMeterDisplay.innerText = `Current Value: +${currentQuestionValue}`;
-                    if (currentQuestionValue <= 10) {
-                        bonusMeterDisplay.style.backgroundColor = "#e67e22"; // Warns the class of score bleed
-                    } else {
-                        bonusMeterDisplay.style.backgroundColor = "#2ecc71";
+                // Countdown Score calculations only tick down if the player isn't rushing
+                if (speedMultiplier === 1) {
+                    let dynamicValue = Math.max(5, Math.round(20 - (progress / 92) * 15));
+                    if (dynamicValue !== currentQuestionValue) {
+                        currentQuestionValue = dynamicValue;
+                        bonusMeterDisplay.innerText = `Current Value: +${currentQuestionValue}`;
+                        if (currentQuestionValue <= 10) {
+                            bonusMeterDisplay.style.backgroundColor = "#e67e22"; 
+                        } else {
+                            bonusMeterDisplay.style.backgroundColor = "#2ecc71";
+                        }
                     }
                 }
 
@@ -488,7 +527,6 @@
                     bubble.element.style.transform = `translate(-50%, -50%) scale(${scale})`;
                 });
 
-                // Check depth interaction bounds
                 if (progress >= 92) { 
                     clearInterval(interval);
                     
@@ -513,9 +551,9 @@
                 feedbackBox.style.borderColor = '#2ecc71';
                 feedbackTitle.innerText = `🎉 正確 (+${currentQuestionValue} POINTS!)`;
                 feedbackTitle.style.color = '#2ecc71';
-                feedbackText.innerHTML = `太棒了！你選到了正確的句子！因答題速度，獲得了 <b>${currentQuestionValue}</b> 分！[cite: 1, 2]<br><br>${currentRoundQuestion.exp}`;
+                feedbackText.innerHTML = `太棒了！你選到了正確的句子！因答題速度，獲得了 <b>${currentQuestionValue}</b> 分！<br><br>${currentRoundQuestion.exp}`;
             } else {
-                playSound("wrong"); // Fart audio trigger
+                playSound("wrong"); 
                 if (currentPlayer === 1) p1Score = Math.max(0, p1Score - 5); else p2Score = Math.max(0, p2Score - 5);
                 feedbackBox.style.borderColor = '#e74c3c';
                 feedbackTitle.innerText = "💨 答錯或漏掉囉 (INCORRECT!)";
