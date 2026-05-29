@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Frequency Freeway - Universal 3D Live Video Edition</title>
+    <title>Frequency Freeway - Universal Native Arcade 3D Edition</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            background: #090915;
+            background: #020208;
             font-family: 'Arial', sans-serif;
             overflow: hidden;
             color: white;
@@ -22,31 +22,29 @@
             position: relative;
             width: 100vw;
             height: 100vh;
-            background: rgba(2, 2, 8, 0.4); /* Reduced background darkness opacity for transparency */
+            background: linear-gradient(to bottom, #050515 0%, #0d0d2b 40%, #03030f 100%);
             overflow: hidden;
         }
 
-        /* Ambient YouTube Video Layer behind game elements */
-        #video-background-layer {
+        /* --- NATIVE HIGH-PERFORMANCE ANIMATED BACKGROUND --- */
+        /* Replaces YouTube completely to avoid blocked videos or iPad restrictions */
+        #arcade-bg-layer {
             position: absolute;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             z-index: 1;
-            opacity: 0.45; /* Half-transparent visibility backdrop styling */
-            pointer-events: none; /* Mouse/Touch click-through to game logic */
             overflow: hidden;
+            opacity: 0.55; /* Half-transparent visibility look */
+            pointer-events: none;
         }
-        #video-background-layer iframe {
+        .star {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 100vw;
-            height: 56.25vw; /* 16:9 Aspect Ratio enforcement */
-            min-height: 100vh;
-            min-width: 177.77vh; /* 16:9 Aspect Ratio enforcement */
-            transform: translate(-50%, -50%);
+            background: #3498db;
+            border-radius: 50%;
+            opacity: 0;
+            transform-origin: center;
         }
 
         /* Fixed Top Prompt Box - Layered safely above everything */
@@ -107,7 +105,7 @@
             left: 50%;
             width: 1200px;
             height: 78vh;
-            background: rgba(30, 30, 36, 0.75); /* Soft alpha blend for transparent depth readability */
+            background: rgba(30, 30, 36, 0.82); /* Semi-transparent highway surface blend */
             transform: translateX(-50%) rotateX(65deg); /* Slanted 3D road perspective matrix */
             transform-origin: bottom center;
             border-left: 12px solid #f1c40f;
@@ -217,11 +215,9 @@
 <body>
 
     <div id="game-container">
-        <div id="video-background-layer">
-            <div id="yt-player-target"></div>
-        </div>
+        <div id="arcade-bg-layer"></div>
 
-        <div id="prompt-box">請點擊或觸碰畫面任一處以啟動遊戲與背景影片！<br>(Click or Tap anywhere to start!)</div>
+        <div id="prompt-box">請點擊或觸碰畫面任一處以啟動遊戲！<br>(Click or Tap anywhere to start!)</div>
 
         <div id="ui-header">
             <div class="score-box" style="color: #e74c3c;">P1: <span id="p1-score">0</span></div>
@@ -244,11 +240,6 @@
     </div>
 
     <script>
-        // --- CUSTOMIZE YOUR BACKGROUND VIDEO LINK HERE ---
-        // Change this string token identifier to match whatever YouTube Video ID code you like!
-        // Example: For "https://www.youtube.com/watch?v=dQw4w9WgXcQ", the ID string is "dQw4w9WgXcQ"
-        const youtubeVideoId = "5W9t3wS0Ccc"; // Currently maps to a 4K neon synthwave retro freeway driving loop
-
         const container = document.getElementById('game-container');
         const car = document.getElementById('car');
         const divider = document.getElementById('scrolling-divider');
@@ -261,6 +252,7 @@
         const feedbackTitle = document.getElementById('feedback-title');
         const feedbackText = document.getElementById('feedback-text');
         const nextBtn = document.getElementById('next-btn');
+        const bgLayer = document.getElementById('arcade-bg-layer');
 
         let p1Score = 0;
         let p2Score = 0;
@@ -271,7 +263,7 @@
         let currentRoundQuestion = null;
         let activeBubbles = [];
         let musicInterval = null;
-        let ytPlayer = null;
+        let starFieldParticles = [];
         
         let currentQuestionValue = 20; 
         let scrollOffset = 0;
@@ -402,46 +394,59 @@
             }
         ];
 
-        // --- ASYNCHRONOUS YOUTUBE IFRAME PLAYER PLAYER ENGINE ---
-        // Dynamically request and append script tag header tracking hooks
-        const tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        // --- HIGH PERFORMANCE CUSTOM PARTICLE STARFIELD BUILDER ---
+        function generateNativeBackground() {
+            const starCount = 35;
+            for(let i=0; i<starCount; i++) {
+                const el = document.createElement('div');
+                el.className = 'star';
+                bgLayer.appendChild(el);
+                
+                // Assign a randomized vector tracking path expanding outwards
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 300 + Math.random() * 500;
+                const tx = (Math.cos(angle) * distance) + (window.innerWidth / 2);
+                const ty = (Math.sin(angle) * distance) + (window.innerHeight * 0.4);
 
-        // YouTube frame initializer script hook entrypoint callback
-        function onYouTubeIframeAPIReady() {
-            ytPlayer = new YT.Player('yt-player-target', {
-                videoId: youtubeVideoId,
-                playerVars: {
-                    'autoplay': 0,
-                    'controls': 0,
-                    'disablekb': 1,
-                    'hl': 'zh-TW',
-                    'loop': 1,
-                    'playlist': youtubeVideoId,
-                    'modestbranding': 1,
-                    'rel': 0,
-                    'showinfo': 0,
-                    'mute': 1, // Keep muted so it doesn't conflict with arcade synth tones
-                    'playsinline': 1
-                },
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                }
-            });
-        }
-
-        function onPlayerReady(event) {
-            // Player is initialized and waiting for user-interaction trigger block to play stream
-        }
-
-        function onPlayerStateChange(event) {
-            // Safety callback ensuring looping mechanics remain active
-            if (event.data === YT.PlayerState.ENDED && ytPlayer) {
-                ytPlayer.playVideo();
+                starFieldParticles.push({
+                    element: el,
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight * 0.4,
+                    tx: tx,
+                    ty: ty,
+                    speed: 0.5 + Math.random() * 1.5,
+                    progress: Math.random() * 100, // Stagger initial starts
+                    size: 2 + Math.random() * 4
+                });
             }
+        }
+
+        function updateNativeStars() {
+            starFieldParticles.forEach(star => {
+                // Stars move faster when rushing!
+                star.progress += (star.speed * speedMultiplier * 0.6);
+                if(star.progress >= 100) {
+                    star.progress = 0;
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = 400 + Math.random() * 600;
+                    star.tx = (Math.cos(angle) * distance) + (window.innerWidth / 2);
+                    star.ty = (Math.sin(angle) * distance) + (window.innerHeight * 0.4);
+                }
+
+                const ratio = star.progress / 100;
+                const curX = star.x + (star.tx - star.x) * ratio;
+                const curY = star.y + (star.ty - star.y) * ratio;
+                const currentSize = star.size * (0.2 + ratio * 2);
+
+                star.element.style.left = curX + 'px';
+                star.element.style.top = curY + 'px';
+                star.element.style.width = currentSize + 'px';
+                star.element.style.height = currentSize + 'px';
+                star.element.style.opacity = ratio < 0.2 ? ratio * 5 : (1 - ratio) * 1.2;
+                
+                // Color variation shifting matching cyberpunk look
+                star.element.style.backgroundColor = star.progress > 50 ? '#9b59b6' : '#3498db';
+            });
         }
 
         // --- WEB AUDIO AUDIO SYNTH ENGINE ---
@@ -473,16 +478,17 @@
             if (!audioCtx) return;
             let now = audioCtx.currentTime;
             if (type === "correct") {
-                let osc = audioCtx.createOscillator();
+                let osc = document.createElement('div'); // semantic dummy anchor
+                let oscNode = audioCtx.createOscillator();
                 let gainNode = audioCtx.createGain();
-                osc.type = "sine";
-                osc.frequency.setValueAtTime(523.25, now);
-                osc.frequency.setValueAtTime(659.25, now + 0.1);
-                osc.frequency.setValueAtTime(783.99, now + 0.2);
+                oscNode.type = "sine";
+                oscNode.frequency.setValueAtTime(523.25, now);
+                oscNode.frequency.setValueAtTime(659.25, now + 0.1);
+                oscNode.frequency.setValueAtTime(783.99, now + 0.2);
                 gainNode.gain.setValueAtTime(0.2, now);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-                osc.connect(gainNode); gainNode.connect(audioCtx.destination);
-                osc.start(now); osc.stop(now + 0.5);
+                oscNode.connect(gainNode); gainNode.connect(audioCtx.destination);
+                oscNode.start(now); oscNode.stop(now + 0.5);
             } else if (type === "wrong" || type === "miss") {
                 let osc1 = audioCtx.createOscillator();
                 let osc2 = audioCtx.createOscillator();
@@ -533,12 +539,7 @@
             if (gameFirstStart) {
                 gameFirstStart = false;
                 initAudio();
-                
-                // Fire YouTube Video Play command inside user action scope block
-                if (ytPlayer && ytPlayer.playVideo) {
-                    ytPlayer.playVideo();
-                }
-                
+                generateNativeBackground();
                 gameActive = true;
                 startRound();
             } else if (gameActive && speedMultiplier === 1) {
@@ -614,6 +615,9 @@
 
                 scrollOffset += (4 * speedMultiplier);
                 divider.style.top = ((-100 + (scrollOffset % 80))) + 'px';
+
+                // Continuous star field renderer loop tick
+                updateNativeStars();
 
                 if (speedMultiplier === 1) {
                     let dynamicValue = Math.max(5, Math.round(20 - (progress / 92) * 15));
