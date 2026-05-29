@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Frequency Freeway - Universal 3D Touch Edition</title>
+    <title>Frequency Freeway - Universal 3D Live Video Edition</title>
     <style>
         body {
             margin: 0;
@@ -22,8 +22,31 @@
             position: relative;
             width: 100vw;
             height: 100vh;
-            background: linear-gradient(to bottom, #020208 15%, #111126 45%, #05050d 100%);
+            background: rgba(2, 2, 8, 0.4); /* Reduced background darkness opacity for transparency */
             overflow: hidden;
+        }
+
+        /* Ambient YouTube Video Layer behind game elements */
+        #video-background-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            opacity: 0.45; /* Half-transparent visibility backdrop styling */
+            pointer-events: none; /* Mouse/Touch click-through to game logic */
+            overflow: hidden;
+        }
+        #video-background-layer iframe {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100vw;
+            height: 56.25vw; /* 16:9 Aspect Ratio enforcement */
+            min-height: 100vh;
+            min-width: 177.77vh; /* 16:9 Aspect Ratio enforcement */
+            transform: translate(-50%, -50%);
         }
 
         /* Fixed Top Prompt Box - Layered safely above everything */
@@ -84,7 +107,7 @@
             left: 50%;
             width: 1200px;
             height: 78vh;
-            background: #1e1e24;
+            background: rgba(30, 30, 36, 0.75); /* Soft alpha blend for transparent depth readability */
             transform: translateX(-50%) rotateX(65deg); /* Slanted 3D road perspective matrix */
             transform-origin: bottom center;
             border-left: 12px solid #f1c40f;
@@ -194,7 +217,11 @@
 <body>
 
     <div id="game-container">
-        <div id="prompt-box">請點擊或觸碰畫面任一處以啟動遊戲！<br>(Click or Tap anywhere to start!)</div>
+        <div id="video-background-layer">
+            <div id="yt-player-target"></div>
+        </div>
+
+        <div id="prompt-box">請點擊或觸碰畫面任一處以啟動遊戲與背景影片！<br>(Click or Tap anywhere to start!)</div>
 
         <div id="ui-header">
             <div class="score-box" style="color: #e74c3c;">P1: <span id="p1-score">0</span></div>
@@ -217,6 +244,11 @@
     </div>
 
     <script>
+        // --- CUSTOMIZE YOUR BACKGROUND VIDEO LINK HERE ---
+        // Change this string token identifier to match whatever YouTube Video ID code you like!
+        // Example: For "https://www.youtube.com/watch?v=dQw4w9WgXcQ", the ID string is "dQw4w9WgXcQ"
+        const youtubeVideoId = "5W9t3wS0Ccc"; // Currently maps to a 4K neon synthwave retro freeway driving loop
+
         const container = document.getElementById('game-container');
         const car = document.getElementById('car');
         const divider = document.getElementById('scrolling-divider');
@@ -239,6 +271,7 @@
         let currentRoundQuestion = null;
         let activeBubbles = [];
         let musicInterval = null;
+        let ytPlayer = null;
         
         let currentQuestionValue = 20; 
         let scrollOffset = 0;
@@ -332,7 +365,7 @@
                 exp: "play 是一般動詞，第三人稱單數問句使用助動詞 Does 開頭。"
             },
             {
-                chinese: " she會和她媽媽一起去購物。 (將sometimes加入句子中)",
+                chinese: "She會和她媽媽一起去購物。 (將sometimes加入句子中)",
                 correct: "She sometimes goes shopping with her mom.",
                 wrong: "She goes sometimes shopping with her mom.",
                 exp: "一般動詞前面要加上頻率副詞 (sometimes goes)。"
@@ -368,6 +401,48 @@
                 exp: "正確順序：疑問詞 What + 助動詞 do + 主詞 you + usually + 原形動詞 do。"
             }
         ];
+
+        // --- ASYNCHRONOUS YOUTUBE IFRAME PLAYER PLAYER ENGINE ---
+        // Dynamically request and append script tag header tracking hooks
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        // YouTube frame initializer script hook entrypoint callback
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('yt-player-target', {
+                videoId: youtubeVideoId,
+                playerVars: {
+                    'autoplay': 0,
+                    'controls': 0,
+                    'disablekb': 1,
+                    'hl': 'zh-TW',
+                    'loop': 1,
+                    'playlist': youtubeVideoId,
+                    'modestbranding': 1,
+                    'rel': 0,
+                    'showinfo': 0,
+                    'mute': 1, // Keep muted so it doesn't conflict with arcade synth tones
+                    'playsinline': 1
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            // Player is initialized and waiting for user-interaction trigger block to play stream
+        }
+
+        function onPlayerStateChange(event) {
+            // Safety callback ensuring looping mechanics remain active
+            if (event.data === YT.PlayerState.ENDED && ytPlayer) {
+                ytPlayer.playVideo();
+            }
+        }
 
         // --- WEB AUDIO AUDIO SYNTH ENGINE ---
         function initAudio() {
@@ -427,7 +502,6 @@
             if (!gameActive) return;
             const screenWidth = window.innerWidth;
             
-            // Checking horizontal alignment splitting boundaries
             if (clientX < screenWidth * 0.5) {
                 carLane = 0; 
                 car.style.left = (screenWidth * 0.5 - 200) + 'px';
@@ -437,12 +511,10 @@
             }
         }
 
-        // Mouse listeners
         window.addEventListener('mousemove', (e) => {
             handleInputMovement(e.clientX);
         });
 
-        // iPad Touch listeners
         window.addEventListener('touchstart', (e) => {
             if(e.touches.length > 0) {
                 handleInputMovement(e.touches[0].clientX);
@@ -456,16 +528,20 @@
 
         // --- UNIVERSAL PRESS EVENT HANDLER (LAUNCHING & RUSH ENGINE) ---
         function triggerMainAction(e) {
-            // Safe intercept ensuring modal window buttons bypass game acceleration
             if (e.target.tagName === 'BUTTON' || feedbackBox.style.display === 'block') return;
 
             if (gameFirstStart) {
                 gameFirstStart = false;
                 initAudio();
+                
+                // Fire YouTube Video Play command inside user action scope block
+                if (ytPlayer && ytPlayer.playVideo) {
+                    ytPlayer.playVideo();
+                }
+                
                 gameActive = true;
                 startRound();
             } else if (gameActive && speedMultiplier === 1) {
-                // RUSH MECHANISM TRIGGERED ON CLICK/TOUCH
                 speedMultiplier = 12; 
                 bonusMeterDisplay.innerText = `RUSHING! Locked: +${currentQuestionValue}`;
                 bonusMeterDisplay.style.backgroundColor = "#9b59b6"; 
@@ -474,7 +550,6 @@
 
         window.addEventListener('click', triggerMainAction);
         window.addEventListener('touchend', (e) => {
-            // Prevent duplicated click firings on mobile browser engines
             e.preventDefault();
             triggerMainAction(e);
         });
@@ -614,10 +689,9 @@
             setTimeout(startRound, 600);
         }
 
-        // Dedicated click and touch hooks specifically for modal navigation on mobile
         nextBtn.addEventListener('click', closeFeedback);
         nextBtn.addEventListener('touchend', (e) => {
-            e.stopPropagation(); // Stops modal click from firing background acceleration
+            e.stopPropagation(); 
             closeFeedback();
         });
     </script>
