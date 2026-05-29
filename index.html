@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frequency Freeway - Click to Rush 3D Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Frequency Freeway - Universal 3D Touch Edition</title>
     <style>
         body {
             margin: 0;
@@ -13,8 +13,10 @@
             overflow: hidden;
             color: white;
             user-select: none;
+            -webkit-user-select: none;
             perspective: 1000px; /* True 3D spatial perspective */
             cursor: pointer;
+            touch-action: none; /* Prevents default iPad gestures from interfering with driving */
         }
         #game-container {
             position: relative;
@@ -33,16 +35,17 @@
             background: #f1c40f;
             color: #111;
             padding: 15px 30px;
-            font-size: 30px;
+            font-size: 26px;
             font-weight: bold;
             border-radius: 12px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.6);
             z-index: 100; /* Highest priority layer: can never be blocked */
             text-align: center;
-            width: 80%;
+            width: 85%;
             max-width: 900px;
             line-height: 1.4;
             border: 3px solid #fff;
+            box-sizing: border-box;
         }
 
         /* Header UI Scoreboard Layered safely just below prompt box */
@@ -60,8 +63,8 @@
             border: 2px solid #444;
             z-index: 90;
         }
-        .score-box { font-size: 28px; font-weight: bold; }
-        #turn-indicator { font-size: 30px; font-weight: bold; text-align: center; }
+        .score-box { font-size: 24px; font-weight: bold; }
+        #turn-indicator { font-size: 26px; font-weight: bold; text-align: center; }
         
         /* Real-time Dynamic Score Value Indicator Box */
         #bonus-meter {
@@ -69,7 +72,7 @@
             color: #fff;
             padding: 4px 15px;
             border-radius: 20px;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: bold;
             box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
         }
@@ -102,7 +105,7 @@
             transform: translateX(-50%);
         }
 
-        /* High-Velocity Mouse Controlled Car */
+        /* High-Velocity Controlled Car */
         #car {
             position: absolute;
             bottom: 60px;
@@ -113,8 +116,9 @@
             transform: translateX(-50%) rotateX(20deg); /* Counter-angled aerodynamic 3D skew */
             transform-origin: bottom center;
             z-index: 50; /* Hovers perfectly above the road floor */
-            pointer-events: none; /* Prevents blocking underlying mouse events */
+            pointer-events: none; /* Prevents blocking underlying input events */
             box-shadow: 0 15px 30px rgba(0,0,0,0.7);
+            transition: left 0.15s ease-out; /* Smooth lane transitions on mobile snaps */
         }
         #car::before {
             content: '';
@@ -156,33 +160,47 @@
             transform: translate(-50%, -50%);
             background: rgba(8, 8, 18, 0.99);
             border: 6px solid #fff;
-            padding: 45px;
+            padding: 35px;
             border-radius: 20px;
             text-align: center;
             display: none;
             z-index: 200; 
-            width: 80%;
+            width: 85%;
             max-width: 850px;
             box-shadow: 0 0 70px rgba(0,0,0,0.95);
+            box-sizing: border-box;
         }
-        #feedback h2 { font-size: 55px; margin-top: 0; }
-        #feedback p { font-size: 32px; line-height: 1.6; margin: 30px 0; }
+        #feedback h2 { font-size: 45px; margin-top: 0; }
+        #feedback p { font-size: 28px; line-height: 1.6; margin: 25px 0; }
         #feedback button {
-            background: #2ecc71; border: none; padding: 20px 60px;
-            color: white; font-size: 32px; font-weight: bold; border-radius: 12px; cursor: pointer;
+            background: #2ecc71; border: none; padding: 15px 50px;
+            color: white; font-size: 28px; font-weight: bold; border-radius: 12px; cursor: pointer;
+        }
+
+        /* Responsive UI fixes specifically tracking iPad form factors */
+        @media (max-width: 1024px) {
+            #prompt-box { font-size: 22px; top: 15px; }
+            #ui-header { top: 140px; padding: 8px 15px; }
+            .score-box { font-size: 18px; }
+            #turn-indicator { font-size: 20px; }
+            #bonus-meter { font-size: 18px; }
+            .bubble { width: 300px; height: 150px; font-size: 20px; border-width: 4px; }
+            #feedback h2 { font-size: 35px; }
+            #feedback p { font-size: 22px; }
+            #feedback button { font-size: 24px; padding: 12px 40px; }
         }
     </style>
 </head>
 <body>
 
     <div id="game-container">
-        <div id="prompt-box">請點擊畫面的任一處以啟動滑鼠3D遊戲！<br>(Click anywhere to start!)</div>
+        <div id="prompt-box">請點擊或觸碰畫面任一處以啟動遊戲！<br>(Click or Tap anywhere to start!)</div>
 
         <div id="ui-header">
-            <div class="score-box" style="color: #e74c3c;">P1 (Red): <span id="p1-score">0</span></div>
+            <div class="score-box" style="color: #e74c3c;">P1: <span id="p1-score">0</span></div>
             <div id="turn-indicator">Player 1's Turn</div>
             <div id="bonus-meter">Current Value: +20</div>
-            <div class="score-box" style="color: #3498db;">P2 (Blue): <span id="p2-score">0</span></div>
+            <div class="score-box" style="color: #3498db;">P2: <span id="p2-score">0</span></div>
         </div>
 
         <div id="highway-3d">
@@ -194,7 +212,7 @@
         <div id="feedback">
             <h2 id="feedback-title">Result</h2>
             <p id="feedback-text">Explanation...</p>
-            <button onclick="closeFeedback()">Next Turn ➔</button>
+            <button id="next-btn">Next Turn ➔</button>
         </div>
     </div>
 
@@ -210,6 +228,7 @@
         const feedbackBox = document.getElementById('feedback');
         const feedbackTitle = document.getElementById('feedback-title');
         const feedbackText = document.getElementById('feedback-text');
+        const nextBtn = document.getElementById('next-btn');
 
         let p1Score = 0;
         let p2Score = 0;
@@ -224,9 +243,9 @@
         let currentQuestionValue = 20; 
         let scrollOffset = 0;
         let gameFirstStart = true;
-        let speedMultiplier = 1; // Used to accelerate the game when clicked
+        let speedMultiplier = 1; 
 
-        // Exact Database synchronized with your uploaded Worksheet document
+        // Exact Database synchronized with your uploaded Worksheet document and customized questions
         const quizDatabase = [
             {
                 chinese: "你星期日通常在家做什麼？ (Dialogue)",
@@ -313,7 +332,7 @@
                 exp: "play 是一般動詞，第三人稱單數問句使用助動詞 Does 開頭。"
             },
             {
-                chinese: "她會和她媽媽一起去購物。 (將sometimes加入句子中)",
+                chinese: " she會和她媽媽一起去購物。 (將sometimes加入句子中)",
                 correct: "She sometimes goes shopping with her mom.",
                 wrong: "She goes sometimes shopping with her mom.",
                 exp: "一般動詞前面要加上頻率副詞 (sometimes goes)。"
@@ -322,16 +341,14 @@
                 chinese: "你常遲到嗎?是喔 我很常。 (簡答時頻率副詞位置)",
                 correct: "Yes, I usually am.",
                 wrong: "Yes, I am usually.",
-                exp: "簡答時頻率副詞位置在be動詞後助動詞前面。"
+                exp: "簡答時頻率副詞位置在be動詞後，助動詞/be動詞簡答時要放在前面：I usually am。"
             },
             {
                 chinese: "你媽常上班遲到嗎?是喔 她很常。 (簡答時頻率副詞位置)",
                 correct: "Yes, she usually does.",
                 wrong: "Yes, she does usually.",
-                exp: "簡答時頻率副詞位置在be動詞後助動詞前面。"
+                exp: "簡答時頻率副詞位置在一般動詞助動詞前面：she usually does。"
             },
-
-
             {
                 chinese: "你通常在什麼時候做功課？ (重組練習第一題)",
                 correct: "When do you usually do your homework?",
@@ -352,7 +369,7 @@
             }
         ];
 
-        // --- CODE SYNTHESIZED AUDIO SYNTH ENGINE ---
+        // --- WEB AUDIO AUDIO SYNTH ENGINE ---
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -405,49 +422,74 @@
             }
         }
 
-        // --- HIGH VELOCITY MOUSE INTERACTION SYSTEM ---
-        window.addEventListener('mousemove', (e) => {
+        // --- UNIVERSAL POSITIONING CONTROLLER (PC MOUSE + IPAD TOUCH) ---
+        function handleInputMovement(clientX) {
             if (!gameActive) return;
-
             const screenWidth = window.innerWidth;
-            const mouseX = e.clientX;
-
-            if (mouseX < screenWidth * 0.5) {
+            
+            // Checking horizontal alignment splitting boundaries
+            if (clientX < screenWidth * 0.5) {
                 carLane = 0; 
-                car.style.left = (screenWidth * 0.5 - 220) + 'px';
+                car.style.left = (screenWidth * 0.5 - 200) + 'px';
             } else {
                 carLane = 1; 
-                car.style.left = (screenWidth * 0.5 + 220) + 'px';
+                car.style.left = (screenWidth * 0.5 + 200) + 'px';
+            }
+        }
+
+        // Mouse listeners
+        window.addEventListener('mousemove', (e) => {
+            handleInputMovement(e.clientX);
+        });
+
+        // iPad Touch listeners
+        window.addEventListener('touchstart', (e) => {
+            if(e.touches.length > 0) {
+                handleInputMovement(e.touches[0].clientX);
+            }
+        });
+        window.addEventListener('touchmove', (e) => {
+            if(e.touches.length > 0) {
+                handleInputMovement(e.touches[0].clientX);
             }
         });
 
-        // Click wrapper handler: Starts the game first, then acts as the "RUSH/SLAM" button!
-        window.addEventListener('click', () => {
+        // --- UNIVERSAL PRESS EVENT HANDLER (LAUNCHING & RUSH ENGINE) ---
+        function triggerMainAction(e) {
+            // Safe intercept ensuring modal window buttons bypass game acceleration
+            if (e.target.tagName === 'BUTTON' || feedbackBox.style.display === 'block') return;
+
             if (gameFirstStart) {
                 gameFirstStart = false;
                 initAudio();
                 gameActive = true;
                 startRound();
             } else if (gameActive && speedMultiplier === 1) {
-                // RUSH MECHANISM TRIGGERED ON CLICK
-                speedMultiplier = 12; // Speed jumps 12x faster to rush answers instantly
+                // RUSH MECHANISM TRIGGERED ON CLICK/TOUCH
+                speedMultiplier = 12; 
                 bonusMeterDisplay.innerText = `RUSHING! Locked: +${currentQuestionValue}`;
-                bonusMeterDisplay.style.backgroundColor = "#9b59b6"; // Purple color indicating rushing state
+                bonusMeterDisplay.style.backgroundColor = "#9b59b6"; 
             }
+        }
+
+        window.addEventListener('click', triggerMainAction);
+        window.addEventListener('touchend', (e) => {
+            // Prevent duplicated click firings on mobile browser engines
+            e.preventDefault();
+            triggerMainAction(e);
         });
 
         function updateCarSkin() {
-            if (currentPlayer === 1) {
-                car.style.backgroundColor = '#e74c3c'; 
-                car.style.boxShadow = '0 12px 30px rgba(231, 76, 60, 0.7), inset 0 -15px 0 #c0392b';
-                turnIndicator.innerText = "👉 Player 1 (Red Car) - Click to SLAM! 👈";
-                turnIndicator.style.color = '#e74c3c';
-            } else {
-                car.style.backgroundColor = '#3498db'; 
-                car.style.boxShadow = '0 12px 30px rgba(52, 152, 219, 0.7), inset 0 -15px 0 #2980b9';
-                turnIndicator.innerText = "👉 Player 2 (Blue Car) - Click to SLAM! 👈";
-                turnIndicator.style.color = '#3498db';
-            }
+            const isP1 = currentPlayer === 1;
+            car.style.backgroundColor = isP1 ? '#e74c3c' : '#3498db';
+            car.style.boxShadow = isP1 
+                ? '0 12px 30px rgba(231, 76, 60, 0.7), inset 0 -15px 0 #c0392b' 
+                : '0 12px 30px rgba(52, 152, 219, 0.7), inset 0 -15px 0 #2980b9';
+            
+            turnIndicator.innerText = isP1 
+                ? "👉 Player 1 (Red) - Slide & Tap to SLAM! 👈" 
+                : "👉 Player 2 (Blue) - Slide & Tap to SLAM! 👈";
+            turnIndicator.style.color = isP1 ? '#e74c3c' : '#3498db';
         }
 
         function startRound() {
@@ -455,7 +497,7 @@
             
             activeBubbles.forEach(b => b.element.remove());
             activeBubbles = [];
-            speedMultiplier = 1; // Reset rush multiplier back to steady default pace
+            speedMultiplier = 1; 
 
             currentQuestionValue = 20;
             bonusMeterDisplay.innerText = "Current Value: +20";
@@ -492,14 +534,12 @@
                     return;
                 }
 
-                // Normal rate is 0.07 (very slow), but jumps to 0.84 when the mouse is clicked to rush answers!
                 let stepSpeed = 0.07 * speedMultiplier;
                 progress += stepSpeed; 
 
                 scrollOffset += (4 * speedMultiplier);
                 divider.style.top = ((-100 + (scrollOffset % 80))) + 'px';
 
-                // Countdown Score calculations only tick down if the player isn't rushing
                 if (speedMultiplier === 1) {
                     let dynamicValue = Math.max(5, Math.round(20 - (progress / 92) * 15));
                     if (dynamicValue !== currentQuestionValue) {
@@ -519,7 +559,7 @@
                     const scale = 0.2 + (bubble.progress / 100) * 0.95; 
                     const verticalPos = 240 + (bubble.progress / 100) * (window.innerHeight - 380);
                     
-                    const laneOffset = bubble.lane === 0 ? -90 - (bubble.progress * 3.4) : 90 + (bubble.progress * 3.4);
+                    const laneOffset = bubble.lane === 0 ? -70 - (bubble.progress * 3.1) : 70 + (bubble.progress * 3.1);
                     const horizontalPos = (screenWidth * 0.5) + laneOffset;
 
                     bubble.element.style.top = verticalPos + 'px';
@@ -569,12 +609,17 @@
             feedbackBox.style.display = 'none';
             activeBubbles.forEach(b => b.element.remove());
             activeBubbles = [];
-            
             currentPlayer = currentPlayer === 1 ? 2 : 1;
-            
             gameActive = true;
             setTimeout(startRound, 600);
         }
+
+        // Dedicated click and touch hooks specifically for modal navigation on mobile
+        nextBtn.addEventListener('click', closeFeedback);
+        nextBtn.addEventListener('touchend', (e) => {
+            e.stopPropagation(); // Stops modal click from firing background acceleration
+            closeFeedback();
+        });
     </script>
 </body>
 </html>
